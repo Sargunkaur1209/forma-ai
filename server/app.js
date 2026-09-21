@@ -1,6 +1,7 @@
 import express from 'express';
 import cors from 'cors';
 import mongoose from 'mongoose';
+import formsRouter from './routes/forms.js';
 
 const app = express();
 
@@ -13,5 +14,6 @@ app.get('/health', (req, res) => {
     db: mongoose.connection.readyState === 1 ? 'connected' : 'disconnected',
   });
 });
+app.use('/api/forms', formsRouter);
 
 export default app;

@@ -1,17 +1,11 @@
 import mongoose from 'mongoose';
+import { FIELD_TYPES } from './formConstants.js';
+import {
+  validateFormSchema,
+  SchemaValidationError,
+} from '../services/validateFormSchema.js';
 
 const { Schema } = mongoose;
-
-export const FIELD_TYPES = [
-  'text',
-  'textarea',
-  'number',
-  'date',
-  'select',
-  'radio',
-  'checkbox',
-];
-export const OPERATORS = ['eq', 'neq', 'in', 'gt', 'lt'];
 
 const optionSchema = new Schema(
   {
@@ -73,21 +67,10 @@ const formSchema = new Schema(
 formSchema.index({ formId: 1, version: 1 }, { unique: true });
 
 // Rules that plain field definitions cannot express.
+// Cross-field rules live in services/validateFormSchema.js.
 formSchema.pre('validate', async function () {
-  const seen = new Set();
-  for (const section of this.sections) {
-    for (const field of section.fields) {
-      if (seen.has(field.key)) {
-        throw new Error(`Duplicate field key: ${field.key}`);
-      }
-      seen.add(field.key);
-
-      const needsOptions = field.type === 'select' || field.type === 'radio';
-      if (needsOptions && !field.options?.length) {
-        throw new Error(`Field "${field.key}" (${field.type}) needs options`);
-      }
-    }
-  }
+  const errors = validateFormSchema(this.toObject());
+  if (errors.length) throw new SchemaValidationError(errors);
 });
 
 export default mongoose.model('FormSchema', formSchema);

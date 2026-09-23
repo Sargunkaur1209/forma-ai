@@ -1,7 +1,7 @@
-export default {
+﻿export default {
   formId: 'auto_claim_v1',
   title: 'Auto insurance claim',
-  version: 1,
+  version: 2,
   sections: [
     {
       id: 'incident',
@@ -17,6 +17,18 @@ export default {
             { value: 'collision', label: 'Collision with a vehicle' },
             { value: 'theft', label: 'Theft' },
           ],
+        },
+        {
+          key: 'animalType',
+          type: 'select',
+          label: 'Which animal?',
+          options: [
+            { value: 'deer', label: 'Deer' },
+            { value: 'other', label: 'Other' },
+          ],
+          showIf: {
+            all: [{ field: 'incidentType', op: 'eq', value: 'animal_collision' }],
+          },
         },
         {
           key: 'incidentDate',

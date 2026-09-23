@@ -41,7 +41,10 @@ function DynamicFormRenderer({ formId }) {
 
   if (loading) {
     return (
-      <div role="status" className="rounded-md bg-white p-6 text-sm text-slate-500 shadow-sm">
+      <div
+        role="status"
+        className="rounded-lg border border-slate-200 bg-white p-6 text-sm text-slate-500 shadow-sm"
+      >
         Loading form...
       </div>
     );
@@ -51,7 +54,7 @@ function DynamicFormRenderer({ formId }) {
     return (
       <p
         role="alert"
-        className="rounded-md border border-red-200 bg-red-50 p-4 text-sm text-red-700"
+        className="rounded-lg border border-red-200 bg-red-50 p-4 text-sm text-red-700"
       >
         Unable to load this form: {error.message}
       </p>
@@ -59,34 +62,39 @@ function DynamicFormRenderer({ formId }) {
   }
 
   return (
-    <form onSubmit={handleSubmit(() => {})} noValidate className="flex flex-col gap-8">
+    <form onSubmit={handleSubmit(() => {})} noValidate className="flex flex-col gap-6">
       {schema.sections.map((section) => (
-        <section key={section.id} className="flex flex-col gap-5">
-          <h2 className="text-xl font-semibold text-slate-800">{section.title}</h2>
+        <section
+          key={section.id}
+          className="rounded-lg border border-slate-200 bg-white p-6 shadow-sm"
+        >
+          <h2 className="mb-5 text-xl font-semibold text-slate-900">{section.title}</h2>
 
-          {section.fields.map((field) => {
-            const FieldComponent = getFieldComponent(field.type);
+          <div className="space-y-4">
+            {section.fields.map((field) => {
+              const FieldComponent = getFieldComponent(field.type);
 
-            if (!FieldComponent) {
+              if (!FieldComponent) {
+                return (
+                  <p
+                    key={field.key}
+                    className="rounded-md border border-amber-200 bg-amber-50 p-3 text-sm text-amber-800"
+                  >
+                    Unsupported field type: {field.type}
+                  </p>
+                );
+              }
+
               return (
-                <p
+                <FieldComponent
                   key={field.key}
-                  className="rounded-md border border-amber-200 bg-amber-50 p-3 text-sm text-amber-800"
-                >
-                  Unsupported field type: {field.type}
-                </p>
+                  field={field}
+                  register={register}
+                  error={formState.errors[field.key]}
+                />
               );
-            }
-
-            return (
-              <FieldComponent
-                key={field.key}
-                field={field}
-                register={register}
-                error={formState.errors[field.key]}
-              />
-            );
-          })}
+            })}
+          </div>
         </section>
       ))}
     </form>

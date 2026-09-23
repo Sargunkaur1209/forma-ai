@@ -30,7 +30,7 @@ function Checkbox({ field, register, error }) {
   const hasError = Boolean(error);
 
   return (
-    <div className="flex flex-col gap-1">
+    <div className="flex flex-col gap-2">
       <div className="flex items-start gap-2">
         <input
           id={checkboxId}
@@ -41,7 +41,7 @@ function Checkbox({ field, register, error }) {
           className="mt-0.5 size-4 rounded border-slate-300 accent-indigo-600 focus:ring-2 focus:ring-indigo-500"
           {...register(key, rules)}
         />
-        <label htmlFor={checkboxId} className="text-sm text-slate-700 leading-snug cursor-pointer">
+        <label htmlFor={checkboxId} className="cursor-pointer text-sm leading-snug text-slate-800">
           {label}
           {required && (
             <span className="ml-1 text-red-500" aria-hidden="true">

@@ -29,8 +29,8 @@ function Select({ field, register, error }) {
   const hasError = Boolean(error);
 
   return (
-    <div className="flex flex-col gap-1">
-      <label htmlFor={selectId} className="text-sm font-medium text-slate-700">
+    <div className="flex flex-col gap-2">
+      <label htmlFor={selectId} className="text-sm font-medium text-slate-800">
         {label}
         {required && (
           <span className="ml-1 text-red-500" aria-hidden="true">
@@ -46,7 +46,7 @@ function Select({ field, register, error }) {
         aria-describedby={hasError ? errorId : undefined}
         defaultValue=""
         className={[
-          'rounded-md border px-3 py-2 text-sm text-slate-900 outline-none',
+          'h-10 rounded-md border px-3 py-2 text-sm text-slate-900 outline-none',
           'focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500',
           hasError ? 'border-red-400 bg-red-50' : 'border-slate-300 bg-white',
         ].join(' ')}

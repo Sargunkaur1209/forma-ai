@@ -12,33 +12,8 @@ import PropTypes from 'prop-types';
  *   register  {fn}    — react-hook-form's register function
  *   error     {object} — react-hook-form error object for this field (may be undefined)
  */
-function TextInput({ field, register, error }) {
-  const { key, label, required = false, validation = {} } = field;
-  const { pattern, min, max, message } = validation;
-
-  // Build the RHF rules object from the schema.
-  const rules = {};
-  if (required) {
-    rules.required = message ?? `${label} is required`;
-  }
-  if (pattern) {
-    rules.pattern = {
-      value: new RegExp(pattern),
-      message: message ?? `${label} has an invalid format`,
-    };
-  }
-  if (min !== undefined) {
-    rules.minLength = {
-      value: min,
-      message: message ?? `${label} must be at least ${min} characters`,
-    };
-  }
-  if (max !== undefined) {
-    rules.maxLength = {
-      value: max,
-      message: message ?? `${label} must be at most ${max} characters`,
-    };
-  }
+function TextInput({ field, register, rules, error }) {
+  const { key, label, required = false } = field;
 
   const inputId = `field-${key}`;
   const errorId = `${inputId}-error`;
@@ -92,12 +67,14 @@ TextInput.propTypes = {
     }),
   }).isRequired,
   register: PropTypes.func.isRequired,
+  rules: PropTypes.object,
   error: PropTypes.shape({
     message: PropTypes.string,
   }),
 };
 
 TextInput.defaultProps = {
+  rules: {},
   error: undefined,
 };
 

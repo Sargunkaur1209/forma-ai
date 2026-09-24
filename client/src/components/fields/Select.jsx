@@ -13,16 +13,8 @@ import PropTypes from 'prop-types';
  *   register  {fn}    — react-hook-form's register function
  *   error     {object} — react-hook-form error object for this field (may be undefined)
  */
-function Select({ field, register, error }) {
-  const { key, label, required = false, options = [], validation = {} } = field;
-  const { message } = validation;
-
-  const rules = {};
-  if (required) {
-    // The empty-string guard catches the blank placeholder option.
-    rules.required = message ?? `Please select a ${label.toLowerCase()}`;
-    rules.validate = (v) => v !== '' || (message ?? `Please select a ${label.toLowerCase()}`);
-  }
+function Select({ field, register, rules, error }) {
+  const { key, label, required = false, options = [] } = field;
 
   const selectId = `field-${key}`;
   const errorId = `${selectId}-error`;
@@ -87,12 +79,14 @@ Select.propTypes = {
     }),
   }).isRequired,
   register: PropTypes.func.isRequired,
+  rules: PropTypes.object,
   error: PropTypes.shape({
     message: PropTypes.string,
   }),
 };
 
 Select.defaultProps = {
+  rules: {},
   error: undefined,
 };
 

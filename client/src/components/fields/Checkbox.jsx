@@ -15,15 +15,8 @@ import PropTypes from 'prop-types';
  * Value contract (from schema-contract.md): boolean
  * RHF registers checkboxes as booleans automatically when type="checkbox".
  */
-function Checkbox({ field, register, error }) {
-  const { key, label, required = false, validation = {} } = field;
-  const { message } = validation;
-
-  const rules = {};
-  if (required) {
-    // For a required checkbox, the value must be true (checked).
-    rules.validate = (v) => v === true || (message ?? `You must check "${label}" to continue`);
-  }
+function Checkbox({ field, register, rules, error }) {
+  const { key, label, required = false } = field;
 
   const checkboxId = `field-${key}`;
   const errorId = `${checkboxId}-error`;
@@ -70,12 +63,14 @@ Checkbox.propTypes = {
     }),
   }).isRequired,
   register: PropTypes.func.isRequired,
+  rules: PropTypes.object,
   error: PropTypes.shape({
     message: PropTypes.string,
   }),
 };
 
 Checkbox.defaultProps = {
+  rules: {},
   error: undefined,
 };
 

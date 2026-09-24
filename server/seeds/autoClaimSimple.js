@@ -1,7 +1,7 @@
 ﻿export default {
   formId: 'auto_claim_v1',
   title: 'Auto insurance claim',
-  version: 2,
+  version: 3,
   sections: [
     {
       id: 'incident',
@@ -28,6 +28,30 @@
           ],
           showIf: {
             all: [{ field: 'incidentType', op: 'eq', value: 'animal_collision' }],
+          },
+        },
+        {
+          key: 'deerAlertActive',
+          type: 'checkbox',
+          label: 'Was a deer-crossing warning sign posted nearby?',
+          showIf: {
+            all: [{ field: 'animalType', op: 'eq', value: 'deer' }],
+          },
+        },
+        {
+          key: 'otherPartyAtFault',
+          type: 'checkbox',
+          label: 'Was the other driver at fault?',
+          showIf: {
+            all: [{ field: 'incidentType', op: 'eq', value: 'collision' }],
+          },
+        },
+        {
+          key: 'otherPartyInsured',
+          type: 'checkbox',
+          label: 'Did the other driver have insurance?',
+          showIf: {
+            all: [{ field: 'otherPartyAtFault', op: 'eq', value: true }],
           },
         },
         {

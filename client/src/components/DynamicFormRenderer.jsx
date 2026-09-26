@@ -1,15 +1,58 @@
 import { useEffect, useState } from 'react';
 import PropTypes from 'prop-types';
-import { useForm } from 'react-hook-form';
+import { useForm, useWatch } from 'react-hook-form';
 import { fetchFormSchema } from '../services/formService';
+import { evaluateShowIf } from '../utils/evaluateShowIf';
 import { buildValidationRules } from '../utils/schemaValidation';
 import { getFieldComponent } from './fields/fieldRegistry';
+
+function ConditionalField({ field, watchedValues, unregister, register, errors }) {
+  const isVisible = evaluateShowIf(field.showIf, watchedValues);
+
+  useEffect(() => {
+    if (!isVisible) {
+      unregister(field.key);
+    }
+  }, [field.key, isVisible, unregister]);
+
+  if (!isVisible) {
+    return null;
+  }
+
+  const FieldComponent = getFieldComponent(field.type);
+
+  if (!FieldComponent) {
+    return (
+      <p className="rounded-md border border-amber-200 bg-amber-50 p-3 text-sm text-amber-800">
+        Unsupported field type: {field.type}
+      </p>
+    );
+  }
+
+  return (
+    <FieldComponent
+      field={field}
+      register={register}
+      rules={buildValidationRules(field)}
+      error={errors[field.key]}
+    />
+  );
+}
+
+ConditionalField.propTypes = {
+  field: PropTypes.object.isRequired,
+  watchedValues: PropTypes.object.isRequired,
+  unregister: PropTypes.func.isRequired,
+  register: PropTypes.func.isRequired,
+  errors: PropTypes.object.isRequired,
+};
 
 function DynamicFormRenderer({ formId }) {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [schema, setSchema] = useState(null);
-  const { register, handleSubmit, formState } = useForm({ mode: 'onBlur' });
+  const { register, unregister, control, handleSubmit, formState } = useForm({ mode: 'onBlur' });
+  const watchedValues = useWatch({ control });
 
   useEffect(() => {
     let isCurrent = true;
@@ -73,26 +116,14 @@ function DynamicFormRenderer({ formId }) {
 
           <div className="space-y-4">
             {section.fields.map((field) => {
-              const FieldComponent = getFieldComponent(field.type);
-
-              if (!FieldComponent) {
-                return (
-                  <p
-                    key={field.key}
-                    className="rounded-md border border-amber-200 bg-amber-50 p-3 text-sm text-amber-800"
-                  >
-                    Unsupported field type: {field.type}
-                  </p>
-                );
-              }
-
               return (
-                <FieldComponent
+                <ConditionalField
                   key={field.key}
                   field={field}
+                  watchedValues={watchedValues}
+                  unregister={unregister}
                   register={register}
-                  rules={buildValidationRules(field)}
-                  error={formState.errors[field.key]}
+                  errors={formState.errors}
                 />
               );
             })}

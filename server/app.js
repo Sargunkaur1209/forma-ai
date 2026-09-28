@@ -2,6 +2,7 @@ import express from 'express';
 import cors from 'cors';
 import mongoose from 'mongoose';
 import formsRouter from './routes/forms.js';
+import llmTestRouter from './routes/llmTest.js';
 
 const app = express();
 
@@ -15,5 +16,8 @@ app.get('/health', (req, res) => {
   });
 });
 app.use('/api/forms', formsRouter);
+if (process.env.NODE_ENV !== 'production') {
+  app.use('/api/llm-test', llmTestRouter);
+}
 
 export default app;

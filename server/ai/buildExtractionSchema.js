@@ -1,9 +1,9 @@
-﻿import { z } from 'zod';
+import { z } from 'zod';
 import { flattenFields } from '../services/formFields.js';
 
-// One Zod type per field type. Every field is nullable: the model returns
-// null when the story does not say anything about it, instead of guessing.
-function zodForField(field) {
+// One Zod type per field type. Fields are optional, because Gemini rejects nullable types: the model omits
+// a key when the story does not say anything about it, instead of guessing.
+export function zodForField(field) {
   let schema;
   switch (field.type) {
     case 'number':
@@ -22,7 +22,7 @@ function zodForField(field) {
     default:
       schema = z.string(); // text, textarea
   }
-  return schema.nullable();
+  return schema;
 }
 
 // Builds the output schema from the form schema, so the form stays the
@@ -30,7 +30,8 @@ function zodForField(field) {
 export function buildExtractionSchema(form) {
   const shape = {};
   for (const field of flattenFields(form)) {
-    shape[field.key] = zodForField(field);
+    shape[field.key] = zodForField(field).optional();
   }
   return z.object(shape);
 }
+

@@ -1,10 +1,10 @@
-﻿import { buildExtractionSchema } from '../ai/buildExtractionSchema.js';
+import { buildExtractionSchema } from '../ai/buildExtractionSchema.js';
 import { buildPrompt } from '../ai/buildPrompt.js';
 import { flattenFields } from '../services/formFields.js';
 import autoClaimSimple from '../seeds/autoClaimSimple.js';
 
 const allNull = () =>
-  Object.fromEntries(flattenFields(autoClaimSimple).map((f) => [f.key, null]));
+  Object.fromEntries(flattenFields(autoClaimSimple).map((f) => [f.key, undefined]));
 
 describe('buildExtractionSchema', () => {
   const schema = buildExtractionSchema(autoClaimSimple);
@@ -76,3 +76,4 @@ describe('buildPrompt', () => {
     expect(closings).toBe(1);
   });
 });
+

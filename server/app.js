@@ -3,6 +3,7 @@ import cors from 'cors';
 import mongoose from 'mongoose';
 import formsRouter from './routes/forms.js';
 import llmTestRouter from './routes/llmTest.js';
+import extractRouter from './routes/extract.js';
 
 const app = express();
 
@@ -19,5 +20,6 @@ app.use('/api/forms', formsRouter);
 if (process.env.NODE_ENV !== 'production') {
   app.use('/api/llm-test', llmTestRouter);
 }
+app.use('/api/extract', extractRouter);
 
 export default app;

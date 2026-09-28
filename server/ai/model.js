@@ -12,7 +12,7 @@ export function getModel(options = {}) {
     model: process.env.LLM_MODEL || DEFAULT_MODEL,
     apiKey: process.env.GOOGLE_API_KEY,
     temperature: 0, // extraction should be deterministic
-    maxRetries: 2,
+    maxRetries: 0,
     ...options,
   });
 }

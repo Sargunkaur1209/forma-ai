@@ -71,3 +71,32 @@ Day 18) to strip the values of hidden fields before saving.
 | `POST /api/extract` | Story → structured answers | Day 10 |
 | `POST /api/submissions` | Final submit, re-validated | Day 18 |
 | `POST /api/drafts`, `PUT /api/drafts/:id`, `GET /api/drafts/:id` | Save/resume | Day 19 |
+
+## LLM setup (local development)
+
+Default provider is **Ollama** (local, free, no rate limit). To set up:
+
+1. Install Ollama: https://ollama.com/download
+2. Pull the model: `ollama pull llama3.1:8b`
+3. Ollama runs automatically in the background after install.
+4. `server/.env` should have `LLM_PROVIDER=ollama`, `LLM_MODEL=llama3.1:8b`, `OLLAMA_BASE_URL=http://localhost:11434` (already the defaults in `.env.example`).
+
+To use Gemini instead (cloud, needs a free API key, subject to rate limits):
+
+1. Get a key: https://aistudio.google.com/app/apikey
+2. In `server/.env`, set `LLM_PROVIDER=google` and `GOOGLE_API_KEY=<your key>`.
+
+## Prompt tuning results (Day 11)
+
+Ran 10 test stories (see `server/ai/runTestStories.js`, `npm run test:stories`) against the extraction pipeline.
+
+| Model | Score | Notes |
+|---|---|---|
+| `gemini-3.5-flash-lite` (initial prompt) | 4/10 | Missed `damageArea`/`animalType` often; occasionally hallucinated a VIN (always correctly rejected by schema validation) |
+| `llama3.1:8b` via Ollama (initial prompt) | 7/10 | No hallucinated VINs; confused `animal_collision` with `collision` |
+| `llama3.1:8b` (+ explicit incidentType disambiguation rule) | 8/10 | `animal_collision` vs `collision` fixed |
+| `llama3.1:8b` (+ animalType linking rule) | 9/10 | The deer-on-I-95 story (from the project plan) now extracts perfectly |
+
+**Known remaining limitation:** `otherPartyAtFault` (a checkbox field) is sometimes missed when fault is stated indirectly (e.g. "it was clearly their fault" rather than "the other driver was at fault"). Not fixed, since further prompt tuning showed diminishing returns; documented here per the Day 11 "tune the prompt" task.
+
+**Design conclusion:** regardless of extraction accuracy, the schema validator (`validateFormSchema.js`) and per-field check in `extractClaim.js` reliably reject invalid AI output (e.g. a hallucinated VIN), so imperfect extraction never corrupts saved data — it surfaces as a `rejected` or `missing` field for the user to fill in during review (Day 17).

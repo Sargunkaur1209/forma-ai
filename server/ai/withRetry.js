@@ -2,6 +2,14 @@
 const NETWORK_CODES = new Set(['ECONNRESET', 'ETIMEDOUT', 'ENOTFOUND', 'EAI_AGAIN']);
 const MAX_WAIT_MS = 30_000;
 
+const PARSE_ERROR_HINTS = [
+  'could not parse',
+  'invalid json',
+  'failed to parse',
+  'output_parsing_failure',
+  'unexpected token',
+];
+
 const defaultSleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
 // LangChain/Gemini errors carry the status in the message, e.g. "[429 Too Many Requests]".
@@ -11,8 +19,15 @@ function statusOf(err) {
   return match ? Number(match[1]) : undefined;
 }
 
+// Structured-output parsing can fail if the model returns malformed JSON.
+// A retry usually produces clean output, so this counts as retryable too.
+function isParseError(err) {
+  const msg = (err?.message ?? '').toLowerCase();
+  return PARSE_ERROR_HINTS.some((hint) => msg.includes(hint));
+}
+
 export function isRetryable(err) {
-  return RETRYABLE_STATUS.has(statusOf(err)) || NETWORK_CODES.has(err?.code);
+  return RETRYABLE_STATUS.has(statusOf(err)) || NETWORK_CODES.has(err?.code) || isParseError(err);
 }
 
 // Google tells us how long to wait: "Please retry in 18.96s".
@@ -22,8 +37,9 @@ function hintedDelayMs(err) {
 }
 
 /**
- * Runs fn(), retrying only on rate limits, overload and network errors.
- * Other errors (bad request, missing key) fail immediately.
+ * Runs fn(), retrying only on rate limits, overload, network errors and
+ * unparseable model output. Other errors (bad request, missing key) fail
+ * immediately.
  */
 export async function withRetry(fn, { attempts = 3, sleep = defaultSleep } = {}) {
   for (let attempt = 1; ; attempt++) {

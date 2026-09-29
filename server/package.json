@@ -9,7 +9,8 @@
     "start": "node server.js",
     "seed": "node seeds/seed.js",
     "test": "node --experimental-vm-modules node_modules/jest/bin/jest.js",
-    "test:stories": "node ai/runTestStories.js"
+    "test:stories": "node ai/runTestStories.js",
+    "audit:schema": "node ai/schemaAudit.js"
   },
   "keywords": [],
   "dependencies": {

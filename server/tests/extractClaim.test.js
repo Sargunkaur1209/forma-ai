@@ -139,3 +139,13 @@ describe('withRetry', () => {
     expect(isRetryable(new Error('[404 Not Found]'))).toBe(false);
   });
 });
+
+
+describe('withRetry parse-error handling', () => {
+  test('retries when the model output cannot be parsed', async () => {
+    const { isRetryable } = await import('../ai/withRetry.js');
+    expect(isRetryable(new Error('Failed to parse. Text: garbled output'))).toBe(true);
+    expect(isRetryable(new Error('OUTPUT_PARSING_FAILURE: malformed'))).toBe(true);
+    expect(isRetryable(new Error('SyntaxError: Unexpected token'))).toBe(true);
+  });
+});

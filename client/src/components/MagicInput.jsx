@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import PropTypes from 'prop-types';
 
-function MagicInput({ onSubmit, isLoading = false }) {
+function MagicInput({ onSubmit, isLoading = false, errorMessage = null, onDismissError }) {
   const [storyText, setStoryText] = useState('');
   const isSubmitDisabled = !storyText.trim() || isLoading;
 
@@ -68,6 +68,33 @@ function MagicInput({ onSubmit, isLoading = false }) {
         )}
       </div>
 
+      {errorMessage && (
+        <div
+          className="flex items-start justify-between gap-4 rounded-md border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-900"
+          role="alert"
+        >
+          <p className="min-w-0 flex-1">{errorMessage}</p>
+          <div className="flex shrink-0 items-center gap-3">
+            <button
+              type="button"
+              onClick={handleSubmit}
+              disabled={isSubmitDisabled}
+              className="font-medium text-red-900 underline decoration-red-300 underline-offset-2 hover:text-red-700 disabled:cursor-not-allowed disabled:opacity-50"
+            >
+              Try again
+            </button>
+            <button
+              type="button"
+              onClick={onDismissError}
+              aria-label="Dismiss extraction error"
+              className="flex size-7 items-center justify-center rounded text-lg leading-none text-red-700 hover:bg-red-100 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-red-700"
+            >
+              ×
+            </button>
+          </div>
+        </div>
+      )}
+
       <p className="text-xs text-slate-500">
         Example: “I was driving north on I-95 when a deer ran into the road and I hit the
         guardrail.”
@@ -79,6 +106,8 @@ function MagicInput({ onSubmit, isLoading = false }) {
 MagicInput.propTypes = {
   onSubmit: PropTypes.func.isRequired,
   isLoading: PropTypes.bool,
+  errorMessage: PropTypes.string,
+  onDismissError: PropTypes.func.isRequired,
 };
 
 export default MagicInput;

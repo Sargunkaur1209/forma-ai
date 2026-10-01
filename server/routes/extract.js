@@ -27,8 +27,8 @@ router.post('/', async (req, res) => {
   }
 
   try {
-    const { answers, missing, rejected } = await extractClaim(form, story);
-    res.json({ formId: form.formId, version: form.version, answers, missing, rejected });
+    const { answers, confidence, missing, rejected } = await extractClaim(form, story);
+    res.json({ formId: form.formId, version: form.version, answers, confidence, missing, rejected });
   } catch (err) {
     console.error('Extraction failed:', err.message);
     const body = { error: 'Extraction failed. Please try again.' };

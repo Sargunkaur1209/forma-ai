@@ -1,4 +1,4 @@
-﻿import { extractClaim } from '../ai/extractClaim.js';
+import { extractClaim } from '../ai/extractClaim.js';
 import { withRetry, isRetryable } from '../ai/withRetry.js';
 import { flattenFields } from '../services/formFields.js';
 import autoClaimSimple from '../seeds/autoClaimSimple.js';
@@ -62,7 +62,7 @@ describe('extractClaim', () => {
     expect(result.answers.incidentDate).toBeUndefined();
     expect(result.rejected).toContainEqual({
       key: 'incidentDate',
-      reason: 'Use the format YYYY-MM-DD',
+      reason: 'date must be YYYY-MM-DD',
     });
   });
 
@@ -149,3 +149,4 @@ describe('withRetry parse-error handling', () => {
     expect(isRetryable(new Error('SyntaxError: Unexpected token'))).toBe(true);
   });
 });
+

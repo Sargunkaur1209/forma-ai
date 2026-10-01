@@ -1,7 +1,7 @@
 ﻿export default {
   formId: 'auto_claim_v1',
   title: 'Auto insurance claim',
-  version: 3,
+  version: 4,
   sections: [
     {
       id: 'incident',
@@ -55,14 +55,23 @@
           },
         },
         {
-          key: 'incidentDate',
-          type: 'text',
-          label: 'Date of incident (YYYY-MM-DD)',
-          required: true,
-          validation: {
-            pattern: '^\\d{4}-\\d{2}-\\d{2}$',
-            message: 'Use the format YYYY-MM-DD',
+          key: 'faultAcknowledged',
+          type: 'radio',
+          label: 'Do you agree with the fault determination above?',
+          options: [
+            { value: 'yes', label: 'Yes' },
+            { value: 'no', label: 'No' },
+            { value: 'unsure', label: 'Not sure' },
+          ],
+          showIf: {
+            all: [{ field: 'otherPartyAtFault', op: 'eq', value: true }],
           },
+        },
+        {
+          key: 'incidentDate',
+          type: 'date',
+          label: 'Date of incident',
+          required: true,
         },
         {
           key: 'incidentLocation',
@@ -125,6 +134,12 @@
         },
         { key: 'vehicleDriveable', type: 'checkbox', label: 'The vehicle is still driveable' },
         { key: 'injuriesReported', type: 'checkbox', label: 'Someone was injured' },
+        {
+          key: 'estimatedRepairCost',
+          type: 'number',
+          label: 'Estimated repair cost (USD)',
+          validation: { min: 0, max: 200000 },
+        },
       ],
     },
   ],

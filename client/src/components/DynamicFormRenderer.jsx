@@ -4,6 +4,7 @@ import { useForm, useWatch } from 'react-hook-form';
 import { fetchFormSchema } from '../services/formService';
 import { evaluateShowIf } from '../utils/evaluateShowIf';
 import { buildValidationRules } from '../utils/schemaValidation';
+import { EXTRACTION_STATUS, useFormStore } from '../store/useFormStore';
 import { getFieldComponent } from './fields/fieldRegistry';
 
 function ConditionalField({ field, watchedValues, unregister, register, errors }) {
@@ -51,8 +52,18 @@ function DynamicFormRenderer({ formId }) {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [schema, setSchema] = useState(null);
-  const { register, unregister, control, handleSubmit, formState } = useForm({ mode: 'onBlur' });
+  const extractedValues = useFormStore((state) => state.values);
+  const extractionStatus = useFormStore((state) => state.extractionStatus);
+  const { register, unregister, control, handleSubmit, formState, reset } = useForm({
+    mode: 'onBlur',
+  });
   const watchedValues = useWatch({ control });
+
+  useEffect(() => {
+    if (extractionStatus === EXTRACTION_STATUS.SUCCESS) {
+      reset(extractedValues);
+    }
+  }, [extractionStatus, extractedValues, reset]);
 
   useEffect(() => {
     let isCurrent = true;

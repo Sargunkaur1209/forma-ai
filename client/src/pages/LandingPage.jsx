@@ -1,4 +1,5 @@
 import PropTypes from 'prop-types';
+import { Link } from 'react-router-dom';
 
 const featureCards = [
   {
@@ -215,20 +216,20 @@ export default function LandingPage() {
             </div>
 
             <div className="hidden items-center gap-7 text-sm text-slate-300 md:flex">
-              <a href="#" className="transition hover:text-white">
+              <Link to="/drafts" className="transition hover:text-white">
                 My drafts
-              </a>
-              <a href="#" className="transition hover:text-white">
+              </Link>
+              <Link to="/for-insurers" className="transition hover:text-white">
                 For insurers
-              </a>
+              </Link>
             </div>
 
-            <button
-              type="button"
+            <Link
+              to="/claim"
               className="rounded-full bg-[#2f6cff] px-4 py-2 text-sm font-semibold text-white shadow-[0_12px_28px_rgba(47,108,255,0.5)] transition hover:bg-[#245ef0]"
             >
               Start a claim
-            </button>
+            </Link>
           </nav>
 
           <div className="mx-auto max-w-5xl pb-12 pt-10 sm:pt-12 lg:pt-16">
@@ -254,20 +255,21 @@ export default function LandingPage() {
                 </p>
 
                 <div className="mt-8 flex flex-col gap-3 sm:flex-row">
-                  <button
-                    type="button"
+                  <Link
+                    to="/claim"
                     className="inline-flex items-center justify-center gap-2 rounded-full bg-[#2f6cff] px-5 py-3 text-sm font-semibold text-white shadow-[0_16px_30px_rgba(47,108,255,0.42)] transition hover:bg-[#245ef0]"
                   >
                     Start a claim
                     <ArrowIcon />
-                  </button>
+                  </Link>
 
-                  <button
-                    type="button"
+                  <Link
+                    to="/claim"
                     className="inline-flex items-center justify-center rounded-full border border-slate-600 bg-transparent px-5 py-3 text-sm font-semibold text-slate-200 transition hover:border-slate-500 hover:bg-slate-800/60"
                   >
+                    {/* Temporary route: real draft resume state will be added in a later task. */}
                     Resume a draft
-                  </button>
+                  </Link>
                 </div>
               </div>
 

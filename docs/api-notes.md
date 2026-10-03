@@ -100,3 +100,23 @@ Ran 10 test stories (see `server/ai/runTestStories.js`, `npm run test:stories`) 
 **Known remaining limitation:** `otherPartyAtFault` (a checkbox field) is sometimes missed when fault is stated indirectly (e.g. "it was clearly their fault" rather than "the other driver was at fault"). Not fixed, since further prompt tuning showed diminishing returns; documented here per the Day 11 "tune the prompt" task.
 
 **Design conclusion:** regardless of extraction accuracy, the schema validator (`validateFormSchema.js`) and per-field check in `extractClaim.js` reliably reject invalid AI output (e.g. a hallucinated VIN), so imperfect extraction never corrupts saved data — it surfaces as a `rejected` or `missing` field for the user to fill in during review (Day 17).
+
+## GET /api/extractions
+
+Lists extraction log entries, newest first (the audit trail Day 17 requires).
+
+**Query params**
+- `limit` — optional, default 20, max 100.
+- `formId` — optional, filters to one form.
+
+**Response**
+```json
+{ "entries": [ { "formId", "formVersion", "story", "provider", "model", "status", "durationMs", "answers"?, "confidence"?, "missing"?, "rejected"?, "errorMessage"?, "createdAt", "updatedAt" } ], "count": N }
+```
+
+Every call to `POST /api/extract` writes one entry here, success or failure.
+Logging failures never break the `/api/extract` response (best-effort, errors
+are caught and logged to the console only).
+
+**No auth yet.** Same caveat as `POST /api/forms` — needs an admin key before
+deployment (Day 21).

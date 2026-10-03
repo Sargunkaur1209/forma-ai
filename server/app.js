@@ -1,9 +1,10 @@
-import express from 'express';
+﻿import express from 'express';
 import cors from 'cors';
 import mongoose from 'mongoose';
 import formsRouter from './routes/forms.js';
 import llmTestRouter from './routes/llmTest.js';
 import extractRouter from './routes/extract.js';
+import extractionsRouter from './routes/extractions.js';
 
 const app = express();
 
@@ -21,5 +22,6 @@ if (process.env.NODE_ENV !== 'production') {
   app.use('/api/llm-test', llmTestRouter);
 }
 app.use('/api/extract', extractRouter);
+app.use('/api/extractions', extractionsRouter);
 
 export default app;

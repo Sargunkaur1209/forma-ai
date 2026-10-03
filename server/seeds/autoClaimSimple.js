@@ -1,7 +1,7 @@
-﻿export default {
+export default {
   formId: 'auto_claim_v1',
   title: 'Auto insurance claim',
-  version: 4,
+  version: 5,
   sections: [
     {
       id: 'incident',
@@ -50,6 +50,7 @@
           key: 'otherPartyInsured',
           type: 'checkbox',
           label: 'Did the other driver have insurance?',
+          required: true,
           showIf: {
             all: [{ field: 'otherPartyAtFault', op: 'eq', value: true }],
           },

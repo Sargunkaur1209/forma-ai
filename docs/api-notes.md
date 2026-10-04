@@ -120,3 +120,36 @@ are caught and logged to the console only).
 
 **No auth yet.** Same caveat as `POST /api/forms` — needs an admin key before
 deployment (Day 21).
+
+## POST /api/submissions
+
+Validates and saves a completed claim. This is the final, authoritative
+check — independent of whatever the client already validated.
+
+**Body**
+```json
+{ "formId": "auto_claim_v1", "version": 5, "answers": { "incidentType": "collision", "...": "..." } }
+```
+
+`version` must be the exact version the form was being filled against (not
+just "the latest"), so an in-progress draft started on an older schema still
+validates correctly.
+
+**What the server does**
+1. Loads the form by `formId` + exact `version` from the database.
+2. Evaluates `showIf` against the submitted answers to find which fields are
+   currently visible.
+3. Strips the value of any field that is not visible, even if the client
+   sent one (stale state is never trusted).
+4. Every visible **required** field must have a value.
+5. Every provided value is checked against its field's type, options,
+   pattern, and min/max — exactly as strict as a fresh validation, not just
+   trusting what extraction or the client already checked.
+
+**Responses**
+- `201` — `{ id, formId, formVersion, answers, status, createdAt }`
+- `400` — `{ error: "Invalid or missing formId" }` / `"Invalid or missing version"` / `"Missing or invalid answers"`
+- `400` — `{ error: "Submission failed validation", details: [{ key, reason }] }`
+- `404` — `{ error: "Form \"<id>\" version <n> not found" }`
+
+**No auth yet.** Same caveat as the other write routes — Day 21.

@@ -5,6 +5,7 @@ import formsRouter from './routes/forms.js';
 import llmTestRouter from './routes/llmTest.js';
 import extractRouter from './routes/extract.js';
 import extractionsRouter from './routes/extractions.js';
+import submissionsRouter from './routes/submissions.js';
 
 const app = express();
 
@@ -23,5 +24,7 @@ if (process.env.NODE_ENV !== 'production') {
 }
 app.use('/api/extract', extractRouter);
 app.use('/api/extractions', extractionsRouter);
+app.use('/api/submissions', submissionsRouter);
 
 export default app;
+

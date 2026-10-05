@@ -1,53 +1,46 @@
-// Temporary manual test harness; likely to be superseded when Vitest is introduced on Day 13.
-import assert from 'node:assert/strict';
-import { describe, it } from 'node:test';
-
+import { describe, expect, it } from 'vitest';
 import { evaluateShowIf } from './evaluateShowIf.js';
 
 describe('evaluateShowIf', () => {
   it('always shows fields without showIf', () => {
-    assert.equal(evaluateShowIf(undefined, {}), true);
-    assert.equal(evaluateShowIf(null, {}), true);
+    expect(evaluateShowIf(undefined, {})).toBe(true);
+    expect(evaluateShowIf(null, {})).toBe(true);
   });
 
   it('evaluates eq conditions', () => {
     const showIf = { all: [{ field: 'incidentType', op: 'eq', value: 'collision' }] };
 
-    assert.equal(evaluateShowIf(showIf, { incidentType: 'collision' }), true);
-    assert.equal(evaluateShowIf(showIf, { incidentType: 'theft' }), false);
+    expect(evaluateShowIf(showIf, { incidentType: 'collision' })).toBe(true);
+    expect(evaluateShowIf(showIf, { incidentType: 'theft' })).toBe(false);
   });
 
   it('evaluates neq conditions', () => {
     const showIf = { all: [{ field: 'incidentType', op: 'neq', value: 'theft' }] };
 
-    assert.equal(evaluateShowIf(showIf, { incidentType: 'collision' }), true);
-    assert.equal(evaluateShowIf(showIf, { incidentType: 'theft' }), false);
+    expect(evaluateShowIf(showIf, { incidentType: 'collision' })).toBe(true);
+    expect(evaluateShowIf(showIf, { incidentType: 'theft' })).toBe(false);
   });
 
   it('evaluates in conditions', () => {
     const showIf = { all: [{ field: 'animalType', op: 'in', value: ['deer', 'moose'] }] };
 
-    assert.equal(evaluateShowIf(showIf, { animalType: 'deer' }), true);
-    assert.equal(evaluateShowIf(showIf, { animalType: 'rabbit' }), false);
+    expect(evaluateShowIf(showIf, { animalType: 'deer' })).toBe(true);
+    expect(evaluateShowIf(showIf, { animalType: 'rabbit' })).toBe(false);
   });
 
   it('evaluates gt and lt conditions', () => {
-    assert.equal(
+    expect(
       evaluateShowIf({ all: [{ field: 'amount', op: 'gt', value: 100 }] }, { amount: 101 }),
-      true,
-    );
-    assert.equal(
+    ).toBe(true);
+    expect(
       evaluateShowIf({ all: [{ field: 'amount', op: 'gt', value: 100 }] }, { amount: 100 }),
-      false,
-    );
-    assert.equal(
+    ).toBe(false);
+    expect(
       evaluateShowIf({ all: [{ field: 'amount', op: 'lt', value: 100 }] }, { amount: 99 }),
-      true,
-    );
-    assert.equal(
+    ).toBe(true);
+    expect(
       evaluateShowIf({ all: [{ field: 'amount', op: 'lt', value: 100 }] }, { amount: 100 }),
-      false,
-    );
+    ).toBe(false);
   });
 
   it('requires every condition in an all group', () => {
@@ -58,12 +51,10 @@ describe('evaluateShowIf', () => {
       ],
     };
 
-    assert.equal(
-      evaluateShowIf(showIf, { incidentType: 'animal_collision', animalType: 'deer' }),
+    expect(evaluateShowIf(showIf, { incidentType: 'animal_collision', animalType: 'deer' })).toBe(
       true,
     );
-    assert.equal(
-      evaluateShowIf(showIf, { incidentType: 'animal_collision', animalType: 'other' }),
+    expect(evaluateShowIf(showIf, { incidentType: 'animal_collision', animalType: 'other' })).toBe(
       false,
     );
   });
@@ -76,13 +67,13 @@ describe('evaluateShowIf', () => {
       ],
     };
 
-    assert.equal(evaluateShowIf(showIf, { incidentType: 'collision', animalType: 'deer' }), true);
-    assert.equal(evaluateShowIf(showIf, { incidentType: 'collision', animalType: 'other' }), false);
+    expect(evaluateShowIf(showIf, { incidentType: 'collision', animalType: 'deer' })).toBe(true);
+    expect(evaluateShowIf(showIf, { incidentType: 'collision', animalType: 'other' })).toBe(false);
   });
 
   it('fails conditions for missing fields', () => {
     const showIf = { all: [{ field: 'animalType', op: 'neq', value: 'other' }] };
 
-    assert.equal(evaluateShowIf(showIf, {}), false);
+    expect(evaluateShowIf(showIf, {})).toBe(false);
   });
 });

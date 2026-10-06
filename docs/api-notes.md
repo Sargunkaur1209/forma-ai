@@ -1,4 +1,4 @@
-﻿# Forma AI — API notes
+# Forma AI — API notes
 
 Base URL (local): `http://localhost:5000`
 
@@ -68,9 +68,49 @@ Day 18) to strip the values of hidden fields before saving.
 
 | Route | Purpose | Target day |
 |---|---|---|
-| `POST /api/extract` | Story → structured answers | Day 10 |
-| `POST /api/submissions` | Final submit, re-validated | Day 18 |
-| `POST /api/drafts`, `PUT /api/drafts/:id`, `GET /api/drafts/:id` | Save/resume | Day 19 |
+| `POST /api/extract` | Story → structured answers | Day 10 ✅ |
+| `POST /api/submissions` | Final submit, re-validated | Day 18 ✅ |
+| `POST /api/drafts`, `PUT /api/drafts/:id`, `GET /api/drafts/:id` | Save/resume | Day 19 ✅ |
+
+## POST /api/drafts
+
+Creates a new draft (partial answers, no required-field validation).
+
+**Body**
+```json
+{ "formId": "auto_claim_v1", "formVersion": 1, "answers": { "incidentType": "collision" }, "story": "A car hit me." }
+```
+`answers` and `story` are optional on create.
+
+**Responses**
+- `201` — `{ id, formId, formVersion, story, answers, status, createdAt, updatedAt }`
+- `400` — `{ "error": "Invalid or missing formId" }` / `"Invalid or missing formVersion"` / `"answers must be a plain object"` / `"story must be a string"`
+
+**No auth yet.** Same caveat as the other write routes — Day 21.
+
+## PUT /api/drafts/:id
+
+Overwrites the `answers` (and optionally `story`) of an existing draft. Full overwrite — not a merge.
+
+**Body**
+```json
+{ "answers": { "incidentType": "animal_collision", "animalType": "deer" }, "story": "A deer ran out." }
+```
+
+**Responses**
+- `200` — updated draft (same shape as POST 201)
+- `400` — `{ "error": "Invalid draft id" }` / `"answers must be a plain object"`
+- `404` — `{ "error": "Draft not found" }`
+
+## GET /api/drafts/:id
+
+Returns a saved draft so the user can resume filling in the form.
+
+**Responses**
+- `200` — draft (same shape as POST 201)
+- `400` — `{ "error": "Invalid draft id" }`
+- `404` — `{ "error": "Draft not found" }`
+
 
 ## LLM setup (local development)
 

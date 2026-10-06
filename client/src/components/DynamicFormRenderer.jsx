@@ -48,7 +48,7 @@ ConditionalField.propTypes = {
   errors: PropTypes.object.isRequired,
 };
 
-function DynamicFormRenderer({ formId }) {
+function DynamicFormRenderer({ formId, onSubmit, isSubmitting }) {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [schema, setSchema] = useState(null);
@@ -117,7 +117,7 @@ function DynamicFormRenderer({ formId }) {
   }
 
   return (
-    <form onSubmit={handleSubmit(() => {})} noValidate className="flex flex-col gap-6">
+    <form onSubmit={handleSubmit(onSubmit ?? (() => {}))} noValidate className="flex flex-col gap-6">
       {schema.sections.map((section) => (
         <section
           key={section.id}
@@ -143,9 +143,10 @@ function DynamicFormRenderer({ formId }) {
       ))}
       <button
         type="submit"
-        className="self-start rounded-md bg-indigo-600 px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
+        disabled={isSubmitting}
+        className="self-start rounded-md bg-indigo-600 px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-60"
       >
-        Submit claim
+        {isSubmitting ? 'Submitting…' : 'Submit claim'}
       </button>
     </form>
   );
@@ -153,6 +154,8 @@ function DynamicFormRenderer({ formId }) {
 
 DynamicFormRenderer.propTypes = {
   formId: PropTypes.string.isRequired,
+  onSubmit: PropTypes.func,
+  isSubmitting: PropTypes.bool,
 };
 
 export default DynamicFormRenderer;

@@ -3,7 +3,7 @@
 :root {
   font-family: Inter, 'Segoe UI', sans-serif;
   color: #0f172a;
-  background: #f4f1ec;
+  background: #f5f7fb;
   line-height: 1.5;
   font-weight: 400;
   font-synthesis: none;
@@ -19,11 +19,21 @@ html {
 body {
   margin: 0;
   min-width: 320px;
-  background: #f4f1ec;
+  background: #f5f7fb;
 }
 
 * {
   box-sizing: border-box;
+}
+
+::selection {
+  color: #312e81;
+  background: #e0e7ff;
+}
+
+.claim-page {
+  background:
+    radial-gradient(ellipse at 50% 0%, rgba(224, 231, 255, 0.55), transparent 38rem), #f5f7fb;
 }
 
 button,

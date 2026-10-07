@@ -86,7 +86,7 @@ function ClaimPage() {
         throw new Error(
           data.details
             ? data.details.map((d) => `${d.key}: ${d.reason}`).join(', ')
-            : (data.error ?? `Submission failed (${response.status})`)
+            : (data.error ?? `Submission failed (${response.status})`),
         );
       }
 
@@ -99,11 +99,24 @@ function ClaimPage() {
 
   if (submitStatus === 'done') {
     return (
-      <main className="min-h-screen bg-slate-100 px-4 py-10">
+      <main className="claim-page min-h-screen px-4 py-12 sm:px-6 sm:py-20">
         <div className="mx-auto max-w-2xl">
-          <div className="rounded-lg border border-green-200 bg-green-50 p-8 text-center shadow-sm">
-            <h1 className="mb-2 text-2xl font-bold text-green-800">Claim submitted!</h1>
-            <p className="text-sm text-green-700">
+          <div className="rounded-3xl border border-emerald-200 bg-white p-8 text-center shadow-xl shadow-slate-200/60 sm:p-12">
+            <div className="mx-auto mb-5 flex size-14 items-center justify-center rounded-2xl bg-emerald-50 text-emerald-700">
+              <svg viewBox="0 0 24 24" fill="none" className="size-7" aria-hidden="true">
+                <path
+                  d="m5 12.5 4.5 4.5L19 7"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
+              </svg>
+            </div>
+            <h1 className="mb-2 text-2xl font-bold tracking-tight text-slate-950">
+              Claim submitted
+            </h1>
+            <p className="text-sm leading-6 text-slate-600">
               Your claim has been received. We&apos;ll be in touch soon.
             </p>
           </div>
@@ -113,10 +126,44 @@ function ClaimPage() {
   }
 
   return (
-    <main className="min-h-screen bg-slate-100 px-4 py-10">
-      <div className="mx-auto max-w-2xl">
-        <h1 className="mb-2 text-3xl font-bold tracking-tight text-slate-900">Forma AI</h1>
-        <p className="mb-8 text-sm text-slate-500">Auto claim form</p>
+    <main className="claim-page min-h-screen px-4 py-8 sm:px-6 sm:py-12">
+      <div className="mx-auto max-w-3xl">
+        <header className="mb-8 flex items-center gap-3 sm:mb-10">
+          <div className="flex size-11 shrink-0 items-center justify-center rounded-2xl bg-indigo-600 text-white shadow-lg shadow-indigo-600/20">
+            <svg viewBox="0 0 24 24" fill="none" className="size-6" aria-hidden="true">
+              <path
+                d="M12 3.5 19 7v5.5c0 4.1-2.8 7.1-7 8-4.2-.9-7-3.9-7-8V7l7-3.5Z"
+                stroke="currentColor"
+                strokeWidth="1.7"
+                strokeLinejoin="round"
+              />
+              <path
+                d="m9 12 2 2 4-4"
+                stroke="currentColor"
+                strokeWidth="1.7"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
+            </svg>
+          </div>
+          <div>
+            <p className="text-lg font-bold tracking-tight text-slate-950">Forma AI</p>
+            <p className="text-xs font-medium text-slate-500">Auto insurance claim</p>
+          </div>
+        </header>
+
+        <div className="mb-7 sm:mb-8">
+          <p className="mb-2 text-xs font-semibold uppercase tracking-[0.16em] text-indigo-600">
+            Start your claim
+          </p>
+          <h1 className="text-3xl font-bold tracking-tight text-slate-950 sm:text-4xl">
+            Let&apos;s get you back on the road.
+          </h1>
+          <p className="mt-3 max-w-2xl text-sm leading-6 text-slate-600 sm:text-base">
+            Tell us what happened. We&apos;ll use your story to fill in the details and guide you
+            through the rest.
+          </p>
+        </div>
 
         <MagicInput
           onSubmit={handleStorySubmit}
@@ -126,7 +173,10 @@ function ClaimPage() {
         />
 
         {submitStatus === 'error' && submitError && (
-          <p role="alert" className="mt-4 rounded-md border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+          <p
+            role="alert"
+            className="mt-5 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm leading-6 text-red-800"
+          >
             {submitError}
           </p>
         )}

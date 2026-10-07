@@ -12,10 +12,18 @@ function MagicInput({ onSubmit, isLoading = false, errorMessage = null, onDismis
   }
 
   return (
-    <section className="flex flex-col gap-3" aria-labelledby="magic-input-title">
-      <h2 id="magic-input-title" className="text-lg font-semibold text-slate-900">
-        Describe what happened
-      </h2>
+    <section
+      className="mb-6 rounded-2xl border border-slate-200/80 bg-white p-4 shadow-lg shadow-slate-200/50 sm:mb-7 sm:rounded-3xl sm:p-6"
+      aria-labelledby="magic-input-title"
+    >
+      <div className="mb-4 flex flex-col gap-1">
+        <h2 id="magic-input-title" className="text-lg font-semibold tracking-tight text-slate-950">
+          Describe what happened
+        </h2>
+        <p className="text-sm leading-5 text-slate-500">
+          Start with the basics. You can review and edit the details below.
+        </p>
+      </div>
 
       <div className="relative" aria-busy={isLoading}>
         <div className={isLoading ? 'invisible' : ''} aria-hidden={isLoading}>
@@ -28,33 +36,42 @@ function MagicInput({ onSubmit, isLoading = false, errorMessage = null, onDismis
             value={storyText}
             onChange={(event) => setStoryText(event.target.value)}
             disabled={isLoading}
-            placeholder="Describe what happened, in your own words..."
+            placeholder="For example: I was driving home when another car hit my passenger-side door..."
             className={[
-              'w-full resize-y rounded-md border px-3 py-2 text-sm text-slate-900 outline-none',
-              'placeholder:text-slate-400 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500',
+              'min-h-36 w-full resize-y rounded-xl border px-4 py-3 text-sm leading-6 text-slate-900 outline-none transition',
+              'placeholder:text-slate-400 focus:border-indigo-500 focus:bg-white focus:ring-4 focus:ring-indigo-500/10',
               'disabled:cursor-not-allowed disabled:bg-slate-50',
-              'border-slate-300 bg-white',
+              'border-slate-200 bg-slate-50/70',
             ].join(' ')}
           />
 
-          <div className="mt-2 flex items-center justify-between gap-3">
-            <p className="text-xs text-slate-500" aria-live="polite">
+          <div className="mt-3 flex flex-col-reverse items-start justify-between gap-3 sm:flex-row sm:items-center">
+            <p className="text-xs font-medium text-slate-500" aria-live="polite">
               {storyText.length} {storyText.length === 1 ? 'character' : 'characters'}
             </p>
             <button
               type="button"
               onClick={handleSubmit}
               disabled={isSubmitDisabled}
-              className="rounded-md bg-indigo-600 px-4 py-2 text-sm font-medium text-white transition hover:bg-indigo-700 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 disabled:cursor-not-allowed disabled:opacity-50"
+              className="inline-flex min-h-11 w-full items-center justify-center gap-2 rounded-xl bg-indigo-600 px-5 py-2.5 text-sm font-semibold text-white shadow-md shadow-indigo-600/15 transition hover:bg-indigo-700 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 disabled:cursor-not-allowed disabled:bg-indigo-300 disabled:shadow-none sm:w-auto"
             >
               Continue
+              <svg viewBox="0 0 20 20" fill="none" className="size-4" aria-hidden="true">
+                <path
+                  d="M4 10h12m-5-5 5 5-5 5"
+                  stroke="currentColor"
+                  strokeWidth="1.7"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
+              </svg>
             </button>
           </div>
         </div>
 
         {isLoading && (
           <div className="absolute inset-0 flex flex-col gap-3" role="status" aria-label="Loading">
-            <div className="flex flex-1 animate-pulse flex-col justify-between gap-3 rounded-md border border-slate-200 bg-white p-3">
+            <div className="flex flex-1 animate-pulse flex-col justify-between gap-3 rounded-xl border border-slate-200 bg-slate-50 p-4">
               <div className="h-3 w-3/4 rounded bg-slate-200" />
               <div className="h-3 w-full rounded bg-slate-200" />
               <div className="h-3 w-5/6 rounded bg-slate-200" />
@@ -70,7 +87,7 @@ function MagicInput({ onSubmit, isLoading = false, errorMessage = null, onDismis
 
       {errorMessage && (
         <div
-          className="flex items-start justify-between gap-4 rounded-md border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-900"
+          className="mt-4 flex items-start justify-between gap-4 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm leading-6 text-red-900"
           role="alert"
         >
           <p className="min-w-0 flex-1">{errorMessage}</p>
@@ -79,7 +96,7 @@ function MagicInput({ onSubmit, isLoading = false, errorMessage = null, onDismis
               type="button"
               onClick={handleSubmit}
               disabled={isSubmitDisabled}
-              className="font-medium text-red-900 underline decoration-red-300 underline-offset-2 hover:text-red-700 disabled:cursor-not-allowed disabled:opacity-50"
+              className="font-semibold text-red-900 underline decoration-red-300 underline-offset-2 hover:text-red-700 disabled:cursor-not-allowed disabled:opacity-50"
             >
               Try again
             </button>
@@ -95,9 +112,9 @@ function MagicInput({ onSubmit, isLoading = false, errorMessage = null, onDismis
         </div>
       )}
 
-      <p className="text-xs text-slate-500">
-        Example: “I was driving north on I-95 when a deer ran into the road and I hit the
-        guardrail.”
+      <p className="mt-4 text-xs leading-5 text-slate-500">
+        <span className="font-semibold text-slate-600">Tip:</span> Include where you were, what
+        happened, and any damage you noticed.
       </p>
     </section>
   );

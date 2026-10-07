@@ -31,7 +31,7 @@ function Checkbox({ field, register, rules, error }) {
           aria-required={required}
           aria-invalid={hasError}
           aria-describedby={hasError ? errorId : undefined}
-          className="mt-0.5 size-4 rounded border-slate-300 accent-indigo-600 focus:ring-2 focus:ring-indigo-500"
+          className="mt-0.5 size-4 rounded border-slate-300 accent-indigo-600 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
           {...register(key, rules)}
         />
         <label htmlFor={checkboxId} className="cursor-pointer text-sm leading-snug text-slate-800">

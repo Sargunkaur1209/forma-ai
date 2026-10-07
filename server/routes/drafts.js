@@ -87,7 +87,26 @@ router.put('/:id', async (req, res) => {
 
   res.json(formatDraft(draft));
 });
+// GET /api/drafts?formId=xxx — list drafts for a form, newest first
+router.get('/', async (req, res) => {
+  const { formId } = req.query;
 
+  if (typeof formId !== 'string' || !FORM_ID_PATTERN.test(formId)) {
+    return res.status(400).json({ error: 'Invalid or missing formId' });
+  }
+
+  const drafts = await Draft.find({ formId })
+    .sort({ updatedAt: -1 })
+    .select('-__v')
+    .lean();
+
+  res.json({
+    drafts: drafts.map(formatDraft),
+    count: drafts.length,
+  });
+});
+
+// GET /api/drafts/:id — resume a draft   ← this stays below
 // GET /api/drafts/:id — resume a draft
 router.get('/:id', async (req, res) => {
   const { id } = req.params;

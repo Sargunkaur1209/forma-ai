@@ -43,6 +43,21 @@ describe('evaluateShowIf', () => {
     ).toBe(false);
   });
 
+  it('does not treat blank or non-numeric values as zero in numeric conditions', () => {
+    expect(
+      evaluateShowIf({ all: [{ field: 'amount', op: 'gt', value: 0 }] }, { amount: '' }),
+    ).toBe(false);
+    expect(
+      evaluateShowIf({ all: [{ field: 'amount', op: 'lt', value: 1 }] }, { amount: null }),
+    ).toBe(false);
+    expect(
+      evaluateShowIf({ all: [{ field: 'amount', op: 'gt', value: '' }] }, { amount: 5 }),
+    ).toBe(false);
+    expect(
+      evaluateShowIf({ all: [{ field: 'amount', op: 'lt', value: 10 }] }, { amount: '5' }),
+    ).toBe(true);
+  });
+
   it('requires every condition in an all group', () => {
     const showIf = {
       all: [

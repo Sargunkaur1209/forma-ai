@@ -1,4 +1,6 @@
 import { useRef, useState } from 'react';
+import PropTypes from 'prop-types';
+import ClaimWorkspace from '../components/ClaimWorkspace';
 import DynamicFormRenderer from '../components/DynamicFormRenderer';
 import MagicInput from '../components/MagicInput';
 import { extractFromStory } from '../services/extractService';
@@ -6,6 +8,106 @@ import { createDraft, updateDraft } from '../services/draftService';
 import { useFormStore } from '../store/useFormStore';
 
 const FORM_ID = 'auto_claim_v1';
+
+const storyChecks = [
+  {
+    label: 'When it happened',
+    pattern: /\b(yesterday|today|last night|on \w+day|\d{1,2}\/\d{1,2})\b/i,
+  },
+  {
+    label: 'Where it happened',
+    pattern: /\b(at|near|on the|highway|street|road|intersection|parking lot)\b/i,
+  },
+  {
+    label: 'Your vehicle',
+    pattern: /\b(car|truck|vehicle|honda|toyota|ford|driving|windshield)\b/i,
+  },
+  {
+    label: 'What was damaged',
+    pattern: /\b(hit|damage|shattered|broken|dent|crash|collision|scratch)\b/i,
+  },
+];
+
+const claimSteps = ['Describe', 'Review answers', 'Follow-ups', 'Confirm'];
+
+function ClaimProgress({ activeStep }) {
+  return (
+    <ol
+      aria-label="Claim progress"
+      className="mb-6 flex items-center justify-between rounded-xl border border-slate-200 bg-white px-3 py-3 sm:px-5"
+    >
+      {claimSteps.map((step, index) => {
+        const isComplete = index < activeStep;
+        const isActive = index === activeStep;
+
+        return (
+          <li
+            key={step}
+            aria-current={isActive ? 'step' : undefined}
+            className="flex min-w-0 items-center gap-1.5 text-[9px] sm:gap-2 sm:text-[11px]"
+          >
+            <span
+              className={`grid size-5 shrink-0 place-items-center rounded-full border text-[9px] font-semibold ${
+                isComplete || isActive
+                  ? 'border-indigo-600 bg-indigo-600 text-white'
+                  : 'border-slate-200 bg-white text-slate-400'
+              }`}
+            >
+              {isComplete ? '✓' : index + 1}
+            </span>
+            <span className={isActive ? 'font-semibold text-slate-900' : 'text-slate-500'}>
+              {step}
+            </span>
+            {index < claimSteps.length - 1 && (
+              <span className="ml-0.5 hidden h-px w-5 bg-slate-200 sm:block md:w-10" />
+            )}
+          </li>
+        );
+      })}
+    </ol>
+  );
+}
+
+ClaimProgress.propTypes = {
+  activeStep: PropTypes.number.isRequired,
+};
+
+function StoryChecklist({ story }) {
+  return (
+    <aside aria-label="Story details" className="rounded-xl border border-slate-200 bg-white p-4">
+      <h2 className="text-[10px] font-semibold uppercase tracking-wide text-slate-700">
+        Your story mentions
+      </h2>
+      <ul className="mt-3 space-y-2.5">
+        {storyChecks.map(({ label, pattern }) => {
+          const isMentioned = pattern.test(story);
+          return (
+            <li key={label} className="flex items-center gap-2 text-[11px]">
+              <span
+                className={`grid size-4 place-items-center rounded-full ${
+                  isMentioned
+                    ? 'bg-indigo-600 text-white'
+                    : 'border border-slate-200 text-slate-300'
+                }`}
+                aria-hidden="true"
+              >
+                {isMentioned ? '✓' : ''}
+              </span>
+              <span className={isMentioned ? 'text-slate-800' : 'text-slate-500'}>{label}</span>
+            </li>
+          );
+        })}
+      </ul>
+      <p className="mt-3 border-t border-slate-100 pt-3 text-[10px] leading-4 text-slate-500">
+        Don&apos;t worry if you miss something. We&apos;ll ask follow-up questions.
+      </p>
+    </aside>
+  );
+}
+
+StoryChecklist.propTypes = {
+  story: PropTypes.string.isRequired,
+};
 
 function ClaimPage() {
   const extractionStatus = useFormStore((state) => state.extractionStatus);
@@ -23,6 +125,7 @@ function ClaimPage() {
   // Submit state (separate from extraction state)
   const [submitStatus, setSubmitStatus] = useState('idle'); // 'idle' | 'saving' | 'done' | 'error'
   const [submitError, setSubmitError] = useState(null);
+  const [story, setStory] = useState('');
 
   async function handleStorySubmit(story) {
     startExtraction(story);
@@ -99,8 +202,8 @@ function ClaimPage() {
 
   if (submitStatus === 'done') {
     return (
-      <main className="claim-page min-h-screen px-4 py-12 sm:px-6 sm:py-20">
-        <div className="mx-auto max-w-2xl">
+      <ClaimWorkspace active="claim" breadcrumb="Auto claim / Confirm">
+        <div className="mx-auto max-w-3xl py-10">
           <div className="rounded-3xl border border-emerald-200 bg-white p-8 text-center shadow-xl shadow-slate-200/60 sm:p-12">
             <div className="mx-auto mb-5 flex size-14 items-center justify-center rounded-2xl bg-emerald-50 text-emerald-700">
               <svg viewBox="0 0 24 24" fill="none" className="size-7" aria-hidden="true">
@@ -121,73 +224,60 @@ function ClaimPage() {
             </p>
           </div>
         </div>
-      </main>
+      </ClaimWorkspace>
     );
   }
 
   return (
-    <main className="claim-page min-h-screen px-4 py-8 sm:px-6 sm:py-12">
-      <div className="mx-auto max-w-3xl">
-        <header className="mb-8 flex items-center gap-3 sm:mb-10">
-          <div className="flex size-11 shrink-0 items-center justify-center rounded-2xl bg-indigo-600 text-white shadow-lg shadow-indigo-600/20">
-            <svg viewBox="0 0 24 24" fill="none" className="size-6" aria-hidden="true">
-              <path
-                d="M12 3.5 19 7v5.5c0 4.1-2.8 7.1-7 8-4.2-.9-7-3.9-7-8V7l7-3.5Z"
-                stroke="currentColor"
-                strokeWidth="1.7"
-                strokeLinejoin="round"
-              />
-              <path
-                d="m9 12 2 2 4-4"
-                stroke="currentColor"
-                strokeWidth="1.7"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              />
-            </svg>
-          </div>
-          <div>
-            <p className="text-lg font-bold tracking-tight text-slate-950">Forma AI</p>
-            <p className="text-xs font-medium text-slate-500">Auto insurance claim</p>
-          </div>
-        </header>
-
+    <ClaimWorkspace
+      active="claim"
+      breadcrumb={`Auto claim / ${extractionStatus === 'success' ? 'Review answers' : 'Describe'}`}
+    >
+      <div className="mx-auto max-w-5xl">
+        <ClaimProgress activeStep={extractionStatus === 'success' ? 1 : 0} />
         <div className="mb-7 sm:mb-8">
-          <p className="mb-2 text-xs font-semibold uppercase tracking-[0.16em] text-indigo-600">
-            Start your claim
+          <p className="mb-1.5 text-[10px] font-semibold uppercase tracking-[0.16em] text-indigo-600">
+            Auto claim
           </p>
-          <h1 className="text-3xl font-bold tracking-tight text-slate-950 sm:text-4xl">
-            Let&apos;s get you back on the road.
+          <h1 className="text-2xl font-bold tracking-tight text-slate-950 sm:text-3xl">
+            What happened?
           </h1>
-          <p className="mt-3 max-w-2xl text-sm leading-6 text-slate-600 sm:text-base">
-            Tell us what happened. We&apos;ll use your story to fill in the details and guide you
-            through the rest.
+          <p className="mt-1.5 max-w-2xl text-sm leading-5 text-slate-600">
+            Write it like you would tell a friend. We&apos;ll fill in the form from your words.
           </p>
         </div>
 
-        <MagicInput
-          onSubmit={handleStorySubmit}
-          isLoading={extractionStatus === 'loading'}
-          errorMessage={extractionStatus === 'error' ? extractionError : null}
-          onDismissError={resetExtraction}
-        />
-
-        {submitStatus === 'error' && submitError && (
-          <p
-            role="alert"
-            className="mt-5 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm leading-6 text-red-800"
-          >
-            {submitError}
-          </p>
-        )}
-
-        <DynamicFormRenderer
-          formId={FORM_ID}
-          onSubmit={handleFormSubmit}
-          isSubmitting={submitStatus === 'saving'}
-        />
+        <div className="grid items-start gap-4 lg:grid-cols-[minmax(0,1fr)_220px]">
+          <div>
+            <MagicInput
+              onSubmit={handleStorySubmit}
+              onStoryChange={setStory}
+              isLoading={extractionStatus === 'loading'}
+              errorMessage={extractionStatus === 'error' ? extractionError : null}
+              onDismissError={resetExtraction}
+            />
+            {submitStatus === 'error' && submitError && (
+              <p
+                role="alert"
+                className="mb-5 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm leading-6 text-red-800"
+              >
+                {submitError}
+              </p>
+            )}
+            {extractionStatus === 'success' && (
+              <DynamicFormRenderer
+                formId={FORM_ID}
+                onSubmit={handleFormSubmit}
+                isSubmitting={submitStatus === 'saving'}
+              />
+            )}
+          </div>
+          <div className="lg:sticky lg:top-5">
+            <StoryChecklist story={story} />
+          </div>
+        </div>
       </div>
-    </main>
+    </ClaimWorkspace>
   );
 }
 

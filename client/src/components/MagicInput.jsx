@@ -1,9 +1,26 @@
 import { useState } from 'react';
 import PropTypes from 'prop-types';
 
-function MagicInput({ onSubmit, isLoading = false, errorMessage = null, onDismissError }) {
+const exampleStories = [
+  'Hit a deer on the highway',
+  'Rear-ended at a red light',
+  'Car broken into overnight',
+];
+
+function MagicInput({
+  onSubmit,
+  onStoryChange,
+  isLoading = false,
+  errorMessage = null,
+  onDismissError,
+}) {
   const [storyText, setStoryText] = useState('');
   const isSubmitDisabled = !storyText.trim() || isLoading;
+
+  function updateStory(value) {
+    setStoryText(value);
+    onStoryChange?.(value);
+  }
 
   function handleSubmit() {
     if (!isSubmitDisabled) {
@@ -34,7 +51,7 @@ function MagicInput({ onSubmit, isLoading = false, errorMessage = null, onDismis
             id="magic-input-story"
             rows={5}
             value={storyText}
-            onChange={(event) => setStoryText(event.target.value)}
+            onChange={(event) => updateStory(event.target.value)}
             disabled={isLoading}
             placeholder="For example: I was driving home when another car hit my passenger-side door..."
             className={[
@@ -85,6 +102,21 @@ function MagicInput({ onSubmit, isLoading = false, errorMessage = null, onDismis
         )}
       </div>
 
+      <div className="mt-3 flex flex-wrap items-center gap-2">
+        <span className="text-[10px] font-medium text-slate-500">Try an example:</span>
+        {exampleStories.map((example) => (
+          <button
+            key={example}
+            type="button"
+            onClick={() => updateStory(example)}
+            disabled={isLoading}
+            className="rounded-full border border-slate-200 bg-white px-2.5 py-1 text-[10px] text-slate-600 transition hover:border-indigo-200 hover:bg-indigo-50 hover:text-indigo-700 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 disabled:cursor-not-allowed"
+          >
+            {example}
+          </button>
+        ))}
+      </div>
+
       {errorMessage && (
         <div
           className="mt-4 flex items-start justify-between gap-4 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm leading-6 text-red-900"
@@ -122,6 +154,7 @@ function MagicInput({ onSubmit, isLoading = false, errorMessage = null, onDismis
 
 MagicInput.propTypes = {
   onSubmit: PropTypes.func.isRequired,
+  onStoryChange: PropTypes.func,
   isLoading: PropTypes.bool,
   errorMessage: PropTypes.string,
   onDismissError: PropTypes.func.isRequired,

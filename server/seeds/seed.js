@@ -1,10 +1,12 @@
-import 'dotenv/config';
+﻿import 'dotenv/config';
 import mongoose from 'mongoose';
 import { connectDB } from '../config/db.js';
 import FormSchema from '../models/FormSchema.js';
 import autoClaimSimple from './autoClaimSimple.js';
+import homeClaim from './homeClaim.js';
+import healthClaim from './healthClaim.js';
 
-const forms = [autoClaimSimple];
+const forms = [autoClaimSimple, homeClaim, healthClaim];
 
 async function seed() {
   await connectDB(process.env.MONGODB_URI);

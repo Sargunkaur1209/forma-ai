@@ -193,3 +193,18 @@ validates correctly.
 - `404` — `{ error: "Form \"<id>\" version <n> not found" }`
 
 **No auth yet.** Same caveat as the other write routes — Day 21.
+
+## Seeded form types (Day 20)
+
+Three form types now exist in MongoDB, proving the engine is schema-driven
+rather than hard-coded to one form:
+
+| formId | Domain | Fields | Branching depth |
+|---|---|---|---|
+| `auto_claim_v1` | Auto insurance | 16 | 3 levels, 2 branch points |
+| `home_claim_v1` | Home insurance | 12 | 3 levels, 1 branch point |
+| `health_claim_v1` | Health insurance | 11 | 3 levels, 1 branch point |
+
+All three were added with zero changes to the renderer, the validator, the
+extraction pipeline, or any route. `npm run audit:schema <formId>` confirms
+structural correctness for any of them.

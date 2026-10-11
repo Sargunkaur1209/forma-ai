@@ -3,6 +3,7 @@ import { BrowserRouter, Route, Routes } from 'react-router-dom';
 import ComingSoonPage from './pages/ComingSoonPage';
 import ClaimPage from './pages/ClaimPage';
 import LandingPage from './pages/LandingPage';
+import NotFoundPage from './pages/NotFoundPage';
 
 function App() {
   return (
@@ -12,6 +13,7 @@ function App() {
         <Route path="/claim" element={<ClaimPage />} />
         <Route path="/drafts" element={<ComingSoonPage heading="My drafts" />} />
         <Route path="/for-insurers" element={<ComingSoonPage heading="For insurers" />} />
+        <Route path="*" element={<NotFoundPage />} />
       </Routes>
     </BrowserRouter>
   );

@@ -1,4 +1,4 @@
-import { Router } from 'express';
+﻿import { Router } from 'express';
 import mongoose from 'mongoose';
 import Draft from '../models/Draft.js';
 
@@ -24,7 +24,7 @@ function formatDraft(doc) {
   };
 }
 
-// POST /api/drafts — create a new draft
+// POST /api/drafts - create a new draft
 router.post('/', async (req, res) => {
   const { formId, formVersion, answers, story } = req.body ?? {};
 
@@ -54,7 +54,7 @@ router.post('/', async (req, res) => {
   res.status(201).json(formatDraft(draft));
 });
 
-// PUT /api/drafts/:id — overwrite answers (and optionally story) of a draft
+// PUT /api/drafts/:id - overwrite answers (and optionally story) of a draft
 router.put('/:id', async (req, res) => {
   const { id } = req.params;
   const { answers, story } = req.body ?? {};
@@ -87,27 +87,12 @@ router.put('/:id', async (req, res) => {
 
   res.json(formatDraft(draft));
 });
-// GET /api/drafts?formId=xxx — list drafts for a form, newest first
-router.get('/', async (req, res) => {
-  const { formId } = req.query;
 
-  if (typeof formId !== 'string' || !FORM_ID_PATTERN.test(formId)) {
-    return res.status(400).json({ error: 'Invalid or missing formId' });
-  }
-
-  const drafts = await Draft.find({ formId })
-    .sort({ updatedAt: -1 })
-    .select('-__v')
-    .lean();
-
-  res.json({
-    drafts: drafts.map(formatDraft),
-    count: drafts.length,
-  });
-});
-
-// GET /api/drafts/:id — resume a draft   ← this stays below
-// GET /api/drafts/:id — resume a draft
+// GET /api/drafts/:id - resume a draft.
+// There is deliberately no "list all drafts for a form" endpoint: with no
+// auth system, that would expose every user's in-progress claim (PII) to
+// anyone who knows a public formId. The frontend must remember the ids of
+// drafts it created (e.g. localStorage) to offer a "my drafts" list.
 router.get('/:id', async (req, res) => {
   const { id } = req.params;
 

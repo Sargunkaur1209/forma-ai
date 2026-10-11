@@ -1,4 +1,4 @@
-import 'dotenv/config';
+﻿import 'dotenv/config';
 import mongoose from 'mongoose';
 import { connectDB } from '../config/db.js';
 import Draft from '../models/Draft.js';
@@ -156,7 +156,7 @@ describe('PUT /api/drafts/:id', () => {
       .send({ answers: { incidentType: 'animal_collision', animalType: 'deer' } });
     expect(res.status).toBe(200);
     expect(res.body.answers).toEqual({ incidentType: 'animal_collision', animalType: 'deer' });
-    // old key must be gone — PUT is a full overwrite
+    // old key must be gone - PUT is a full overwrite
     expect(res.body.answers.name).toBeUndefined();
   });
 
@@ -166,50 +166,5 @@ describe('PUT /api/drafts/:id', () => {
       .send({ answers: {}, story: 'Updated story.' });
     expect(res.status).toBe(200);
     expect(res.body.story).toBe('Updated story.');
-  });
-});
-
-describe('GET /api/drafts', () => {
-  const FORM_ID_LIST = 'drafts_list_test_form';
-
-  beforeAll(async () => {
-    // Create two drafts so we can verify ordering
-    await request(app)
-      .post('/api/drafts')
-      .send({ formId: FORM_ID_LIST, formVersion: 1, answers: { incidentType: 'collision' } });
-    await request(app)
-      .post('/api/drafts')
-      .send({ formId: FORM_ID_LIST, formVersion: 1, answers: { incidentType: 'animal_collision' } });
-  });
-
-  afterAll(async () => {
-    await Draft.deleteMany({ formId: FORM_ID_LIST });
-  });
-
-  test('returns 400 when formId is missing', async () => {
-    const res = await request(app).get('/api/drafts');
-    expect(res.status).toBe(400);
-    expect(res.body.error).toMatch(/formId/);
-  });
-
-  test('returns 400 when formId is invalid', async () => {
-    const res = await request(app).get('/api/drafts?formId=!!bad!!');
-    expect(res.status).toBe(400);
-  });
-
-  test('returns 200 with a list of drafts, newest first', async () => {
-    const res = await request(app).get(`/api/drafts?formId=${FORM_ID_LIST}`);
-    expect(res.status).toBe(200);
-    expect(res.body.count).toBe(2);
-    expect(Array.isArray(res.body.drafts)).toBe(true);
-    // newest first — second created should be first in list
-    expect(res.body.drafts[0].answers.incidentType).toBe('animal_collision');
-  });
-
-  test('returns empty list when no drafts exist for a formId', async () => {
-    const res = await request(app).get('/api/drafts?formId=no_such_form');
-    expect(res.status).toBe(200);
-    expect(res.body.count).toBe(0);
-    expect(res.body.drafts).toEqual([]);
   });
 });

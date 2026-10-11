@@ -208,3 +208,73 @@ rather than hard-coded to one form:
 All three were added with zero changes to the renderer, the validator, the
 extraction pipeline, or any route. `npm run audit:schema <formId>` confirms
 structural correctness for any of them.
+
+## Security (Day 21)
+
+### Admin key on POST /api/forms
+Creating/updating form schemas now requires the `x-admin-key` header to
+match `ADMIN_API_KEY` from `.env`. `GET /api/forms/:formId` stays public,
+since the renderer needs it. Comparison is timing-safe
+(`crypto.timingSafeEqual`).
+
+### Drafts: no list-all endpoint
+`GET /api/drafts?formId=` was removed. With no auth system, listing drafts
+by a public `formId` would expose every user's in-progress claim (PII) to
+anyone. Resuming a specific draft by its id (`GET /api/drafts/:id`) remains
+available; the frontend is responsible for remembering which ids belong to
+the current user (e.g. localStorage), the same pattern as a "save my
+progress" email link.
+
+### Rate limiting, input sanitization, error handling, request logging
+Already in place from earlier in the week: 100 requests/15min on all `/api`
+routes, Mongo operator/dot-key stripping on request bodies, a centralized
+error handler that never leaks internals on 5xx, and structured request
+logging.
+
+### Accepted risk: dev-tool dependency vulnerabilities
+`npm audit` reports vulnerabilities in `braces` (via `nodemon`) and
+`sprintf-js` (via Jest's internal dependency chain). Both are dev-only
+tools that never run in the deployed app. Fixing them requires breaking
+downgrades for no real-world risk reduction, so this is a documented,
+accepted risk rather than an oversight.
+
+### Still open (not addressed here)
+- `POST /api/extract` and `POST /api/submissions` have no auth. Lower
+  priority than `POST /api/forms`, since they don't let a caller redefine
+  what the app considers valid, but worth revisiting if the project
+  continues past this plan.
+
+## Security (Day 21)
+
+### Admin key on POST /api/forms
+Creating/updating form schemas now requires the `x-admin-key` header to
+match `ADMIN_API_KEY` from `.env`. `GET /api/forms/:formId` stays public,
+since the renderer needs it. Comparison is timing-safe
+(`crypto.timingSafeEqual`).
+
+### Drafts: no list-all endpoint
+`GET /api/drafts?formId=` was removed. With no auth system, listing drafts
+by a public `formId` would expose every user's in-progress claim (PII) to
+anyone. Resuming a specific draft by its id (`GET /api/drafts/:id`) remains
+available; the frontend is responsible for remembering which ids belong to
+the current user (e.g. localStorage), the same pattern as a "save my
+progress" email link.
+
+### Rate limiting, input sanitization, error handling, request logging
+Already in place from earlier in the week: 100 requests/15min on all `/api`
+routes, Mongo operator/dot-key stripping on request bodies, a centralized
+error handler that never leaks internals on 5xx, and structured request
+logging.
+
+### Accepted risk: dev-tool dependency vulnerabilities
+`npm audit` reports vulnerabilities in `braces` (via `nodemon`) and
+`sprintf-js` (via Jest's internal dependency chain). Both are dev-only
+tools that never run in the deployed app. Fixing them requires breaking
+downgrades for no real-world risk reduction, so this is a documented,
+accepted risk rather than an oversight.
+
+### Still open (not addressed here)
+- `POST /api/extract` and `POST /api/submissions` have no auth. Lower
+  priority than `POST /api/forms`, since they don't let a caller redefine
+  what the app considers valid, but worth revisiting if the project
+  continues past this plan.

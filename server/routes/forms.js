@@ -1,5 +1,6 @@
-import { Router } from 'express';
+﻿import { Router } from 'express';
 import FormSchema from '../models/FormSchema.js';
+import requireAdminKey from '../middleware/requireAdminKey.js';
 
 const router = Router();
 
@@ -27,7 +28,7 @@ router.get('/:formId', async (req, res) => {
   res.json(form);
 });
 
-router.post('/', async (req, res) => {
+router.post('/', requireAdminKey, async (req, res) => {
   const { formId, title, sections } = req.body ?? {};
 
   if (typeof formId !== 'string' || !FORM_ID_PATTERN.test(formId)) {

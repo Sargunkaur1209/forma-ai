@@ -1,5 +1,7 @@
-﻿import { validateFormSchema } from '../services/validateFormSchema.js';
+import { validateFormSchema } from '../services/validateFormSchema.js';
 import autoClaimSimple from '../seeds/autoClaimSimple.js';
+import homeClaim from '../seeds/homeClaim.js';
+import healthClaim from '../seeds/healthClaim.js';
 
 const field = (over) => ({ key: 'a', type: 'text', label: 'A', ...over });
 const form = (...fields) => ({ sections: [{ id: 's1', title: 'S1', fields }] });
@@ -12,8 +14,12 @@ const pick = {
 const when = (op, value) => ({ all: [{ field: 'pick', op, value }] });
 
 describe('validateFormSchema', () => {
-  test('accepts the real seed form', () => {
-    expect(validateFormSchema(autoClaimSimple)).toEqual([]);
+  test.each([
+    ['auto claim', autoClaimSimple],
+    ['home claim', homeClaim],
+    ['health claim', healthClaim],
+  ])('accepts the %s seed form', (_name, schema) => {
+    expect(validateFormSchema(schema)).toEqual([]);
   });
 
   test('accepts a valid showIf rule', () => {
@@ -65,7 +71,7 @@ describe('validateFormSchema', () => {
     expect(errors).toContainEqual(expect.stringContaining('loop'));
   });
 
-  test('confirms the seed form is 3 levels deep', () => {
+  test('confirms the auto claim seed form is 3 levels deep', () => {
     const fields = autoClaimSimple.sections.flatMap((s) => s.fields);
     const byKey = Object.fromEntries(fields.map((f) => [f.key, f]));
 

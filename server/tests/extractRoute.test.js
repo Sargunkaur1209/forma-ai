@@ -1,4 +1,4 @@
-﻿import 'dotenv/config';
+import 'dotenv/config';
 import mongoose from 'mongoose';
 import { jest } from '@jest/globals';
 import { connectDB } from '../config/db.js';
@@ -124,5 +124,24 @@ describe('POST /api/extract', () => {
     expect(formArg.formId).toBe(TEST_FORM_ID);
     expect(formArg.sections[0].fields[0].key).toBe('name'); // from the real seeded form
   });
-});
 
+  test('returns a successful response within the API response-time budget', async () => {
+    mockExtractClaim.mockResolvedValue({
+      answers: { name: 'Alex' },
+      confidence: { name: 'high' },
+      missing: [],
+      rejected: [],
+    });
+
+    const startedAt = performance.now();
+
+    const res = await request(app)
+      .post('/api/extract')
+      .send({ formId: TEST_FORM_ID, story: 'My name is Alex' });
+
+    const responseTimeMs = performance.now() - startedAt;
+
+    expect(res.status).toBe(200);
+    expect(responseTimeMs).toBeLessThan(1000);
+  });
+});

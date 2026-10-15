@@ -1,51 +1,83 @@
-const API_URL = import.meta.env.VITE_API_URL?.replace(/\/$/, '');
+export class ClaimApiError extends Error {
+  constructor(message, { status = null, details = [], network = false } = {}) {
+    super(message);
+    this.name = 'ClaimApiError';
+    this.status = status;
+    this.details = details;
+    this.network = network;
+  }
+}
 
 function getUrl(path) {
-  if (!API_URL) throw new Error('VITE_API_URL is not configured');
-  return `${API_URL}${path}`;
+  const apiUrl = import.meta.env.VITE_API_URL?.replace(/\/$/, '');
+  if (!apiUrl) throw new Error('VITE_API_URL is not configured');
+  return `${apiUrl}${path}`;
 }
 
-/**
- * POST /api/drafts
- * Creates a new draft and returns the saved document.
- * @param {{ formId: string, formVersion: number, answers?: object, story?: string }} payload
- */
-export async function createDraft(payload) {
-  const response = await fetch(getUrl('/api/drafts'), {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(payload),
-  });
-  const data = await response.json();
-  if (!response.ok) throw new Error(data.error ?? `Failed to save draft (${response.status})`);
-  return data; // { id, formId, formVersion, story, answers, status, createdAt, updatedAt }
-}
+async function request(path, options) {
+  let response;
 
-/**
- * PUT /api/drafts/:id
- * Overwrites the answers (and optionally story) of an existing draft.
- * @param {string} id
- * @param {{ answers: object, story?: string }} payload
- */
-export async function updateDraft(id, payload) {
-  const response = await fetch(getUrl(`/api/drafts/${id}`), {
-    method: 'PUT',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(payload),
-  });
-  const data = await response.json();
-  if (!response.ok) throw new Error(data.error ?? `Failed to update draft (${response.status})`);
+  try {
+    response = await fetch(getUrl(path), options);
+  } catch (error) {
+    if (error instanceof TypeError) {
+      throw new ClaimApiError('Unable to reach the server. Check your connection and try again.', {
+        network: true,
+      });
+    }
+    throw error;
+  }
+
+  let data;
+  try {
+    data = await response.json();
+  } catch {
+    data = {};
+  }
+
+  if (!response.ok) {
+    throw new ClaimApiError(data.error ?? `The server returned an error (${response.status}).`, {
+      status: response.status,
+      details: Array.isArray(data.details) ? data.details : [],
+    });
+  }
+
   return data;
 }
 
-/**
- * GET /api/drafts/:id
- * Fetches a saved draft for resuming.
- * @param {string} id
- */
-export async function fetchDraft(id) {
-  const response = await fetch(getUrl(`/api/drafts/${id}`));
-  const data = await response.json();
-  if (!response.ok) throw new Error(data.error ?? `Draft not found (${response.status})`);
+function jsonRequest(method, body) {
+  return {
+    method,
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(body),
+  };
+}
+
+/** POST /api/drafts */
+export function createDraft(payload) {
+  return request('/api/drafts', jsonRequest('POST', payload));
+}
+
+/** PUT /api/drafts/:id */
+export function updateDraft(id, payload) {
+  return request(`/api/drafts/${encodeURIComponent(id)}`, jsonRequest('PUT', payload));
+}
+
+/** GET /api/drafts/:id */
+export function fetchDraft(id) {
+  return request(`/api/drafts/${encodeURIComponent(id)}`);
+}
+
+/** GET /api/drafts?formId=:formId */
+export async function fetchRecentDrafts(formId) {
+  const data = await request(`/api/drafts?formId=${encodeURIComponent(formId)}`);
+  if (!Array.isArray(data.drafts)) {
+    throw new ClaimApiError('The server returned an invalid recent drafts response.');
+  }
   return data;
+}
+
+/** POST /api/submissions */
+export function submitClaim(payload) {
+  return request('/api/submissions', jsonRequest('POST', payload));
 }

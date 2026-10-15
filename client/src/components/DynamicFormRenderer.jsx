@@ -4,10 +4,10 @@ import { useForm, useWatch } from 'react-hook-form';
 import { fetchFormSchema } from '../services/formService';
 import { evaluateShowIf } from '../utils/evaluateShowIf';
 import { buildValidationRules } from '../utils/schemaValidation';
-import { EXTRACTION_STATUS, useFormStore } from '../store/useFormStore';
+import { EXTRACTION_STATUS, getNestedValue, useFormStore } from '../store/useFormStore';
 import { getFieldComponent } from './fields/fieldRegistry';
 
-function ConditionalField({ field, watchedValues, unregister, register, errors }) {
+function ConditionalField({ field, watchedValues, unregister, register, clearErrors, errors }) {
   const isVisible = evaluateShowIf(field.showIf, watchedValues);
 
   useEffect(() => {
@@ -30,10 +30,22 @@ function ConditionalField({ field, watchedValues, unregister, register, errors }
     );
   }
 
+  function registerField(key, rules) {
+    const registration = register(key, rules);
+    if (errors[key]?.type !== 'server') return registration;
+    return {
+      ...registration,
+      onChange: (event) => {
+        clearErrors(key);
+        return registration.onChange(event);
+      },
+    };
+  }
+
   return (
     <FieldComponent
       field={field}
-      register={register}
+      register={registerField}
       rules={buildValidationRules(field)}
       error={errors[field.key]}
     />
@@ -45,18 +57,51 @@ ConditionalField.propTypes = {
   watchedValues: PropTypes.object.isRequired,
   unregister: PropTypes.func.isRequired,
   register: PropTypes.func.isRequired,
+  clearErrors: PropTypes.func.isRequired,
   errors: PropTypes.object.isRequired,
 };
 
-function DynamicFormRenderer({ formId, onSubmit, isSubmitting }) {
+function getVisibleAnswers(values, schema) {
+  const fields = schema.sections.flatMap((section) => section.fields);
+  const conditionValues = Object.fromEntries(
+    fields
+      .map((field) => [field.key, getNestedValue(values, field.key)])
+      .filter(([, value]) => value !== undefined),
+  );
+  const visibleFields = fields.filter((field) => evaluateShowIf(field.showIf, conditionValues));
+
+  return Object.fromEntries(
+    visibleFields
+      .map((field) => [field.key, getNestedValue(values, field.key)])
+      .filter(([, value]) => value !== undefined),
+  );
+}
+
+function DynamicFormRenderer({
+  formId,
+  onSubmit,
+  isSubmitting,
+  onSaveDraft,
+  isSavingDraft,
+  serverErrors,
+  onSchemaLoaded,
+}) {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [schema, setSchema] = useState(null);
   const extractedValues = useFormStore((state) => state.values);
   const extractionStatus = useFormStore((state) => state.extractionStatus);
-  const { register, unregister, control, handleSubmit, formState, reset } = useForm({
-    mode: 'onBlur',
-  });
+  const {
+    register,
+    unregister,
+    control,
+    handleSubmit,
+    formState,
+    reset,
+    setError: setFieldError,
+    clearErrors,
+    getValues,
+  } = useForm({ mode: 'onBlur' });
   const watchedValues = useWatch({ control });
 
   useEffect(() => {
@@ -64,6 +109,16 @@ function DynamicFormRenderer({ formId, onSubmit, isSubmitting }) {
       reset(extractedValues);
     }
   }, [extractionStatus, extractedValues, reset]);
+
+  useEffect(() => {
+    if (!schema) return;
+    const fieldKeys = new Set(
+      schema.sections.flatMap((section) => section.fields.map((field) => field.key)),
+    );
+    Object.entries(serverErrors ?? {}).forEach(([key, message]) => {
+      if (fieldKeys.has(key)) setFieldError(key, { type: 'server', message });
+    });
+  }, [schema, serverErrors, setFieldError]);
 
   useEffect(() => {
     let isCurrent = true;
@@ -75,6 +130,7 @@ function DynamicFormRenderer({ formId, onSubmit, isSubmitting }) {
     fetchFormSchema(formId)
       .then((nextSchema) => {
         if (isCurrent) {
+          onSchemaLoaded?.(nextSchema.version);
           setSchema(nextSchema);
         }
       })
@@ -92,7 +148,7 @@ function DynamicFormRenderer({ formId, onSubmit, isSubmitting }) {
     return () => {
       isCurrent = false;
     };
-  }, [formId]);
+  }, [formId, onSchemaLoaded]);
 
   if (loading) {
     return (
@@ -124,7 +180,7 @@ function DynamicFormRenderer({ formId, onSubmit, isSubmitting }) {
 
   return (
     <form
-      onSubmit={handleSubmit(onSubmit ?? (() => {}))}
+      onSubmit={handleSubmit((values) => onSubmit?.(getVisibleAnswers(values, schema)))}
       noValidate
       className="flex flex-col gap-5 sm:gap-6"
     >
@@ -156,6 +212,7 @@ function DynamicFormRenderer({ formId, onSubmit, isSubmitting }) {
                   watchedValues={watchedValues}
                   unregister={unregister}
                   register={register}
+                  clearErrors={clearErrors}
                   errors={formState.errors}
                 />
               );
@@ -167,19 +224,31 @@ function DynamicFormRenderer({ formId, onSubmit, isSubmitting }) {
         <p className="text-xs leading-5 text-slate-500">
           Review your answers before submitting your claim.
         </p>
-        <button
-          type="submit"
-          disabled={isSubmitting}
-          className="inline-flex min-h-11 w-full items-center justify-center gap-2 rounded-xl bg-indigo-600 px-5 py-2.5 text-sm font-semibold text-white shadow-md shadow-indigo-600/15 transition hover:bg-indigo-700 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 disabled:cursor-not-allowed disabled:bg-indigo-300 disabled:shadow-none sm:w-auto"
-        >
-          {isSubmitting && (
-            <span
-              className="size-4 animate-spin rounded-full border-2 border-white/40 border-t-white"
-              aria-hidden="true"
-            />
+        <div className="flex flex-col gap-3 sm:flex-row">
+          {onSaveDraft && (
+            <button
+              type="button"
+              disabled={isSavingDraft || isSubmitting}
+              onClick={() => onSaveDraft(getVisibleAnswers(getValues(), schema))}
+              className="inline-flex min-h-11 w-full items-center justify-center gap-2 rounded-xl border border-slate-300 bg-white px-5 py-2.5 text-sm font-semibold text-slate-700 transition hover:bg-slate-50 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 disabled:cursor-not-allowed disabled:opacity-60 sm:w-auto"
+            >
+              {isSavingDraft ? 'Saving draft…' : 'Save draft'}
+            </button>
           )}
-          {isSubmitting ? 'Submitting…' : 'Submit claim'}
-        </button>
+          <button
+            type="submit"
+            disabled={isSubmitting || isSavingDraft}
+            className="inline-flex min-h-11 w-full items-center justify-center gap-2 rounded-xl bg-indigo-600 px-5 py-2.5 text-sm font-semibold text-white shadow-md shadow-indigo-600/15 transition hover:bg-indigo-700 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 disabled:cursor-not-allowed disabled:bg-indigo-300 disabled:shadow-none sm:w-auto"
+          >
+            {isSubmitting && (
+              <span
+                className="size-4 animate-spin rounded-full border-2 border-white/40 border-t-white"
+                aria-hidden="true"
+              />
+            )}
+            {isSubmitting ? 'Submitting…' : 'Submit claim'}
+          </button>
+        </div>
       </div>
     </form>
   );
@@ -189,6 +258,10 @@ DynamicFormRenderer.propTypes = {
   formId: PropTypes.string.isRequired,
   onSubmit: PropTypes.func,
   isSubmitting: PropTypes.bool,
+  onSaveDraft: PropTypes.func,
+  isSavingDraft: PropTypes.bool,
+  serverErrors: PropTypes.object,
+  onSchemaLoaded: PropTypes.func,
 };
 
 export default DynamicFormRenderer;

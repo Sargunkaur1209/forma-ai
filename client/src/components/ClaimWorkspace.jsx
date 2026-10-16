@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 
 const claimNavigation = [
   { label: 'Current claim', to: '/claim/auto', icon: 'document', activeKey: 'claim' },
-  { label: 'My drafts', to: '/drafts', icon: 'drafts' },
+  { label: 'My drafts', to: '/drafts', icon: 'drafts', activeKey: 'drafts' },
   { label: 'Submitted', to: '/submitted', icon: 'check' },
 ];
 
@@ -53,7 +53,7 @@ function ClaimWorkspace({ active = '', breadcrumb, children }) {
   return (
     <div className="flex min-h-screen flex-col bg-[#f5f4f0] text-slate-900 lg:flex-row">
       <aside className="flex w-full shrink-0 flex-col bg-[#10131d] text-slate-300 lg:min-h-screen lg:w-56">
-        <div className="flex items-center justify-between px-4 py-4 lg:px-5 lg:pb-5">
+        <div className="flex items-center justify-between gap-3 px-4 py-3 lg:px-5 lg:pb-5">
           <Link to="/" className="flex items-center gap-2.5 text-sm font-semibold text-white">
             <span className="grid size-7 place-items-center rounded-lg bg-indigo-600 text-xs font-bold">
               F
@@ -63,20 +63,26 @@ function ClaimWorkspace({ active = '', breadcrumb, children }) {
           <span className="rounded bg-white/10 px-1.5 py-0.5 text-[9px] font-semibold uppercase tracking-wide text-slate-400">
             beta
           </span>
+          <Link
+            to="/claim"
+            className="inline-flex min-h-9 items-center justify-center gap-2 rounded-lg bg-indigo-600 px-3 text-xs font-semibold text-white transition hover:bg-indigo-500 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-300 lg:hidden"
+          >
+            <span aria-hidden="true">+</span> New claim
+          </Link>
         </div>
 
         <Link
           to="/claim"
-          className="mx-3 mb-5 inline-flex min-h-10 items-center justify-center gap-2 rounded-lg bg-indigo-600 px-3 text-xs font-semibold text-white transition hover:bg-indigo-500 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-300"
+          className="mx-3 mb-5 hidden min-h-10 items-center justify-center gap-2 rounded-lg bg-indigo-600 px-3 text-xs font-semibold text-white transition hover:bg-indigo-500 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-300 lg:inline-flex"
         >
           <span aria-hidden="true">+</span> New claim
         </Link>
 
         <nav aria-label="Claims" className="px-3">
-          <p className="mb-2 px-2 text-[9px] font-semibold uppercase tracking-[0.18em] text-slate-500">
+          <p className="mb-2 hidden px-2 text-[9px] font-semibold uppercase tracking-[0.18em] text-slate-500 lg:block">
             Claims
           </p>
-          <div className="flex gap-1 overflow-x-auto lg:flex-col">
+          <div className="flex gap-1 overflow-x-auto pb-2 lg:flex-col lg:overflow-visible lg:pb-0">
             {claimNavigation.map((item) => (
               <Link
                 key={item.label}

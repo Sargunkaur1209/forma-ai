@@ -69,13 +69,15 @@ export function fetchDraft(id) {
 }
 
 /** GET /api/drafts?formId=:formId */
-export async function fetchRecentDrafts(formId) {
+export async function fetchDrafts(formId) {
   const data = await request(`/api/drafts?formId=${encodeURIComponent(formId)}`);
-  if (!Array.isArray(data.drafts)) {
-    throw new ClaimApiError('The server returned an invalid recent drafts response.');
+  if (!Array.isArray(data.drafts) || !Number.isInteger(data.count)) {
+    throw new ClaimApiError('The server returned an invalid drafts response.');
   }
   return data;
 }
+
+export const fetchRecentDrafts = fetchDrafts;
 
 /** POST /api/submissions */
 export function submitClaim(payload) {

@@ -6,6 +6,7 @@ import ClaimTypePage from './pages/ClaimTypePage';
 import DraftsPage from './pages/DraftsPage';
 import LandingPage from './pages/LandingPage';
 import NotFoundPage from './pages/NotFoundPage';
+import SubmittedPage from './pages/SubmittedPage';
 
 function ClaimEntryRoute() {
   const [searchParams] = useSearchParams();
@@ -24,7 +25,7 @@ function App() {
         <Route path="/claim" element={<ClaimEntryRoute />} />
         <Route path="/claim/auto" element={<ClaimPage />} />
         <Route path="/drafts" element={<DraftsPage />} />
-        <Route path="/submitted" element={<ComingSoonPage heading="Submitted claims" />} />
+        <Route path="/submitted" element={<SubmittedPage />} />
         <Route path="/for-insurers" element={<ComingSoonPage heading="For insurers" />} />
         <Route path="*" element={<NotFoundPage />} />
       </Routes>

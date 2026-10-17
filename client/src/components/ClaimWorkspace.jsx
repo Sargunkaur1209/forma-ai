@@ -4,7 +4,7 @@ import { Link } from 'react-router-dom';
 const claimNavigation = [
   { label: 'Current claim', to: '/claim/auto', icon: 'document', activeKey: 'claim' },
   { label: 'My drafts', to: '/drafts', icon: 'drafts', activeKey: 'drafts' },
-  { label: 'Submitted', to: '/submitted', icon: 'check' },
+  { label: 'Submitted', to: '/submitted', icon: 'check', activeKey: 'submitted' },
 ];
 
 function NavigationIcon({ name }) {

@@ -51,6 +51,50 @@ describe('POST /api/submissions', () => {
     expect(res.status).toBe(400);
   });
 
+  describe('GET /api/submissions', () => {
+    test('returns submissions newest first', async () => {
+      const older = await Submission.create({
+        formId: TEST_FORM_ID,
+        formVersion: 1,
+        answers: { name: 'Older submission' },
+      });
+
+      const newer = await Submission.create({
+        formId: TEST_FORM_ID,
+        formVersion: 1,
+        answers: { name: 'Newer submission' },
+      });
+
+      // Ensure distinct timestamps so the ordering assertion is deterministic.
+      await Submission.updateOne(
+        { _id: older._id },
+        { $set: { createdAt: new Date('2026-01-01T00:00:00.000Z') } }
+      );
+      await Submission.updateOne(
+        { _id: newer._id },
+        { $set: { createdAt: new Date('2026-01-02T00:00:00.000Z') } }
+      );
+
+      const res = await request(app).get('/api/submissions');
+
+      expect(res.status).toBe(200);
+      expect(Array.isArray(res.body)).toBe(true);
+
+      const testSubmissions = res.body.filter(
+        (submission) => submission.formId === TEST_FORM_ID
+      );
+
+      expect(testSubmissions[0].id).toBe(newer._id.toString());
+      expect(testSubmissions[1].id).toBe(older._id.toString());
+      expect(testSubmissions[0]).toMatchObject({
+        formId: TEST_FORM_ID,
+        formVersion: 1,
+        answers: { name: 'Newer submission' },
+        status: 'submitted',
+      });
+    });
+  });
+
   test('returns 400 when version is missing or not a positive integer', async () => {
     const res = await request(app)
       .post('/api/submissions')

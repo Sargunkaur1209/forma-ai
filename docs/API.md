@@ -30,6 +30,8 @@ VITE_API_URL=http://localhost:5000
 | POST | `/api/claims` | Create and save a claim |
 | GET | `/api/claims/:id` | Get a saved claim |
 | PATCH | `/api/claims/:id` | Update a claim |
+| GET | `/api/submissions` | List submitted forms, newest first |
+| POST | `/api/submissions` | Validate and create a submission |
 
 ---
 
@@ -334,6 +336,56 @@ Content-Type: application/json
 ```
 
 ---
+
+# List Submissions
+
+## `GET /api/submissions`
+
+Returns all submitted records, ordered by creation time from newest to oldest.
+
+### Request
+
+```http
+GET /api/submissions
+```
+
+No request body is required.
+
+### Successful Response
+
+**Status:** `200 OK`
+
+The response is a JSON array. Each item contains the submission ID, form ID, form version, validated answers, status, and creation timestamp.
+
+```json
+[
+  {
+    "id": "671234567890abcdef123456",
+    "formId": "auto_claim",
+    "formVersion": 1,
+    "answers": {
+      "incidentDate": "2026-10-18",
+      "description": "Another vehicle hit my car."
+    },
+    "status": "submitted",
+    "createdAt": "2026-10-19T10:30:00.000Z"
+  }
+]
+```
+
+The example values are illustrative. If no submissions exist, the endpoint returns an empty array:
+
+```json
+[]
+```
+
+### Status Codes
+
+| Code | Meaning |
+|---|---|
+| `200` | Submissions retrieved successfully |
+| `500` | Internal server error while retrieving submissions |
+
 
 # Error Handling
 

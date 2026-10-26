@@ -296,12 +296,9 @@ export default function LandingPage() {
 
         <section className="pb-16">
           <h2 className="text-4xl font-bold tracking-tight">From story to submitted claim</h2>
-          <ol className="mt-8 grid gap-4 md:grid-cols-3">
+          <ol className="mt-8 grid gap-4 md:grid-cols-2 lg:grid-cols-4">
             {steps.map((s, i) => (
-              <li
-                key={s.title}
-                className={`rounded-xl border border-stone-200 bg-white p-6 ${i === 3 ? 'md:col-span-3' : ''}`}
-              >
+              <li key={s.title} className="rounded-xl border border-stone-200 bg-white p-6">
                 <span className="font-mono text-xs tracking-widest text-indigo-600">
                   STEP {String(i + 1).padStart(2, '0')}
                 </span>

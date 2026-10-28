@@ -19,7 +19,7 @@ An insurance claim form that fills itself from a typed story — and only asks t
 |-------|------|
 | Frontend | React 19, Vite, Tailwind CSS v4, React Hook Form, Zustand |
 | Backend | Node.js, Express, Mongoose, MongoDB |
-| AI | LangChain, OpenAI |
+| AI | LangChain, Google Gemini or Ollama |
 | Tooling | ESLint, Prettier, Vitest |
 
 ---
@@ -34,11 +34,13 @@ forma-ai/
 │   │   ├── hooks/               # Custom React hooks
 │   │   ├── store/               # Zustand state
 │   │   └── services/            # API call helpers
-│   └── .env.example
+│   └── .env.example             # Frontend API URL
 ├── server/          # Express backend (Chandrakant)
-│   └── .gitkeep
+│   ├── routes/       # API endpoints
+│   ├── models/       # Mongoose models
+│   ├── services/     # Validation and form helpers
+│   └── .env.example  # Database, API, and AI configuration
 ├── docs/            # Schema contract, API notes, screenshots, final report
-│   └── .gitkeep
 └── README.md
 ```
 
@@ -46,41 +48,75 @@ forma-ai/
 
 ## Getting Started
 
-### Client
+### Prerequisites
+
+- Node.js and npm
+- MongoDB running locally or a MongoDB connection string
+- Ollama running locally for the default AI provider, or a Google AI API key
+
+### Start the backend
+
+In a terminal from the repository root:
+
+```bash
+cd server
+npm install
+cp .env.example .env
+```
+
+Edit `server/.env` if needed, then start the server:
+
+```bash
+npm run dev
+```
+
+The API listens on `http://localhost:5000`. To load the bundled form schemas into MongoDB, run `npm run seed` from `server/`.
+
+### Start the client
+
+In a second terminal from the repository root:
 
 ```bash
 cd client
 npm install
+cp .env.example .env
 npm run dev
 ```
 
-### Server
-
-> Coming soon — Chandrakant is setting this up on Day 1.
+Vite prints the local client URL when it starts (typically `http://localhost:5173`).
 
 ---
 
 ## Environment Variables
 
-Each folder has a `.env.example` listing the variables it needs. Copy it to `.env` and fill in real values — never commit `.env`.
+Each app has a `.env.example`; copy it to `.env` and adjust values for your setup. Never commit `.env` files or API keys.
 
-| File | Variable | Description |
-|------|----------|-------------|
-| `client/.env.example` | `VITE_API_URL` | Base URL of the Express API |
+| File | Variable(s) | Description |
+|------|-------------|-------------|
+| `client/.env` | `VITE_API_URL` | Base URL of the Express API |
+| `server/.env` | `MONGODB_URI` | MongoDB connection string |
+| `server/.env` | `LLM_PROVIDER`, `LLM_MODEL` | AI provider (`ollama` or `google`) and model name |
+| `server/.env` | `OLLAMA_BASE_URL` | Ollama server URL; used with the `ollama` provider |
+| `server/.env` | `GOOGLE_API_KEY` | Required when using the `google` provider |
+| `server/.env` | `PORT`, `CLIENT_ORIGIN` | Optional API port and allowed frontend origin |
+| `server/.env` | `ADMIN_API_KEY` | Optional key for protected admin routes |
 
 ---
 
-## Scripts
+## Useful Scripts
 
-Run these from inside the relevant folder (`cd client` first):
+Run each command from its app folder:
 
-| Script | Command | What it does |
-|--------|---------|--------------|
-| Dev server | `npm run dev` | Starts Vite dev server with HMR |
-| Production build | `npm run build` | Bundles for production into `dist/` |
-| Lint | `npm run lint` | ESLint check across `src/` |
-| Format | `npm run format` | Prettier write (fixes in place) |
-| Format check | `npm run format:check` | Prettier check (CI-safe, no writes) |
+| App | Command | What it does |
+|-----|---------|--------------|
+| Client | `npm run dev` | Starts Vite with hot module replacement |
+| Client | `npm run build` | Builds the production client into `dist/` |
+| Client | `npm run lint` | Runs ESLint across `src/` |
+| Client | `npm test` | Runs the client test suite |
+| Server | `npm run dev` | Starts the API with automatic restarts |
+| Server | `npm start` | Starts the API |
+| Server | `npm run seed` | Loads the bundled form schemas into MongoDB |
+| Server | `npm test` | Runs the backend test suite |
 
 ---
 
